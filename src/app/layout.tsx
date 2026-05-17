@@ -5,9 +5,9 @@ import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins( { 
-  subsets: ["latin"], 
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
+  subsets  : ["latin"], 
+  weight   : ["300", "400", "500", "600", "700"],
+  variable : "--font-poppins",
 } );
 
 export const metadata: Metadata = {
@@ -24,7 +24,9 @@ export default function RootLayout( {
     <html lang="en"
       suppressHydrationWarning
     >
-      <body className={`${poppins.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${poppins.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         <Providers>
           {children}
           <Toaster />

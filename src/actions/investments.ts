@@ -55,7 +55,7 @@ export async function createInvestment( data: {
     revalidatePath( "/" );
     
     return { 
-      success     : true, 
+      success    : true, 
       investment : JSON.parse( JSON.stringify( investment ) ) 
     };
   } catch ( error: any ) {
@@ -83,7 +83,7 @@ export async function updateInvestment( id: string, data: {
     revalidatePath( "/" );
     
     return { 
-      success     : true, 
+      success    : true, 
       investment : JSON.parse( JSON.stringify( investment ) ) 
     };
   } catch ( error: any ) {

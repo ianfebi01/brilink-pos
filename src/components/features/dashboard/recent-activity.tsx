@@ -26,8 +26,8 @@ export function RecentActivity( { transactions }: RecentActivityProps ) {
           </div>
           <div className="ml-auto font-medium text-sm">
             +{new Intl.NumberFormat( "id-ID", {
-              style    : "currency",
-              currency : "IDR",
+              style                 : "currency",
+              currency              : "IDR",
               maximumFractionDigits : 0,
             } ).format( Number( tx.agentProfit ) )}
           </div>

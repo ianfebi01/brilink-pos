@@ -7,10 +7,10 @@ async function main() {
   const rules = await prisma.feeRule.count()
   const transactions = await prisma.transaction.count()
   
-  console.log({ users, categories, rules, transactions })
+  console.log( { users, categories, rules, transactions } )
   
-  const sampleRule = await prisma.feeRule.findFirst({ include: { category: true } })
-  console.log('Sample Rule:', JSON.stringify(sampleRule, null, 2))
+  const sampleRule = await prisma.feeRule.findFirst( { include : { category : true } } )
+  console.log( 'Sample Rule:', JSON.stringify( sampleRule, null, 2 ) )
 }
 
-main().finally(() => prisma.$disconnect())
+main().finally( () => prisma.$disconnect() )

@@ -24,8 +24,8 @@ const tierSchema = z.object( {
 } );
 
 const feeRuleSchema = z.object( {
-  categoryId : z.string().min( 1 ),
-  name       : z.string().min( 2 ),
+  categoryId  : z.string().min( 1 ),
+  name        : z.string().min( 2 ),
   formulaJson : z.array( tierSchema ).min( 1 ),
 } );
 
@@ -138,7 +138,7 @@ export async function duplicateFeeRule( id: string ) {
 
     const newRule = await prisma.feeRule.create( {
       data : {
-        categoryId  : `copy-${Date.now()}-${existingRule.categoryId}`.substring(0, 30), // Temp unique id
+        categoryId  : `copy-${Date.now()}-${existingRule.categoryId}`.substring( 0, 30 ), // Temp unique id
         name        : `${existingRule.name} (Copy)`,
         formulaJson : existingRule.formulaJson as any,
         isActive    : existingRule.isActive,

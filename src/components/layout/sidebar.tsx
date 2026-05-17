@@ -83,7 +83,8 @@ export function Sidebar() {
             >
               <Menu className="h-5 w-5" />
             </Button>
-          } />
+          }
+          />
           <SheetContent side="left"
             className="w-full sm:w-80 p-0 flex flex-col bg-sidebar text-sidebar-foreground border-r-0"
           >

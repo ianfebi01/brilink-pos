@@ -5,15 +5,19 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 
 import { cn } from "@/lib/utils"
 
-function Popover({ ...props }: PopoverPrimitive.Root.Props) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+function Popover( { ...props }: PopoverPrimitive.Root.Props ) {
+  return <PopoverPrimitive.Root data-slot="popover"
+    {...props}
+         />
 }
 
-function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+function PopoverTrigger( { ...props }: PopoverPrimitive.Trigger.Props ) {
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger"
+    {...props}
+         />
 }
 
-function PopoverContent({
+function PopoverContent( {
   className,
   align = "center",
   alignOffset = 0,
@@ -24,7 +28,7 @@ function PopoverContent({
   Pick<
     PopoverPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  > ) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
@@ -47,34 +51,34 @@ function PopoverContent({
   )
 }
 
-function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
+function PopoverHeader( { className, ...props }: React.ComponentProps<"div"> ) {
   return (
     <div
       data-slot="popover-header"
-      className={cn("flex flex-col gap-0.5 text-sm", className)}
+      className={cn( "flex flex-col gap-0.5 text-sm", className )}
       {...props}
     />
   )
 }
 
-function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
+function PopoverTitle( { className, ...props }: PopoverPrimitive.Title.Props ) {
   return (
     <PopoverPrimitive.Title
       data-slot="popover-title"
-      className={cn("font-medium", className)}
+      className={cn( "font-medium", className )}
       {...props}
     />
   )
 }
 
-function PopoverDescription({
+function PopoverDescription( {
   className,
   ...props
-}: PopoverPrimitive.Description.Props) {
+}: PopoverPrimitive.Description.Props ) {
   return (
     <PopoverPrimitive.Description
       data-slot="popover-description"
-      className={cn("text-muted-foreground", className)}
+      className={cn( "text-muted-foreground", className )}
       {...props}
     />
   )

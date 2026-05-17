@@ -63,7 +63,7 @@ export async function getTransactions( limit = 50, offset = 0, query?: string, f
     const session = await getServerSession( authOptions );
     const userRole = ( session?.user as any )?.role;
 
-    let where: any = {};
+    const where: any = {};
     
     if ( query ) {
       where.OR = [
