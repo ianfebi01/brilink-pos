@@ -68,23 +68,43 @@ export function DateRangeFilter( {
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-[260px] justify-start text-left font-normal h-9 text-xs bg-muted/30",
+                  "w-[260px] justify-start text-left font-normal h-9 text-xs bg-muted/30 transition-all duration-300 ease-in-out relative pr-9",
                   !date && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format( date.from, "dd MMM yyyy", { locale : id } )} -{" "}
-                      {format( date.to, "dd MMM yyyy", { locale : id } )}
-                    </>
+                <div className="flex items-center">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format( date.from, "dd MMM yyyy", { locale : id } )} -{" "}
+                        {format( date.to, "dd MMM yyyy", { locale : id } )}
+                      </>
+                    ) : (
+                      format( date.from, "dd MMM yyyy", { locale : id } )
+                    )
                   ) : (
-                    format( date.from, "dd MMM yyyy", { locale : id } )
-                  )
-                ) : (
-                  <span>Pilih rentang tanggal</span>
+                    <span>Pilih rentang tanggal</span>
+                  )}
+                </div>
+                <div className={cn(
+                  "absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-300 origin-center shrink-0",
+                  ( fromParam || toParam ) 
+                    ? "opacity-100 scale-100" 
+                    : "opacity-0 scale-50 pointer-events-none"
                 )}
+                >
+                  <div
+                    role="button"
+                    className="p-1 hover:bg-muted rounded-md cursor-pointer"
+                    onClick={( e ) => {
+                      e.preventDefault();
+                      clearFilter();
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </div>
+                </div>
               </Button>
             }
           />
@@ -107,16 +127,6 @@ export function DateRangeFilter( {
           </PopoverContent>
         </Popover>
       </div>
-      {( fromParam || toParam ) && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-9 w-9 p-0"
-          onClick={clearFilter}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      )}
     </div>
   );
 }
