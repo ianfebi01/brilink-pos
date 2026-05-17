@@ -27,6 +27,7 @@ export default async function TransactionsPage() {
         <TransactionFormDialog 
           categories={catRes.categories || []} 
           feeRules={ruleRes.rules || []} 
+          recentTransactions={(txRes.transactions || []).slice(0, 5)}
         />
       </div>
       <TransactionTable transactions={txRes.transactions || []} />

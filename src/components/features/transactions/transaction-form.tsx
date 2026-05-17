@@ -12,7 +12,7 @@ import { calculateTransaction } from "@/features/formulas/engine";
 import { createTransaction } from "@/actions/transactions";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Zap } from "lucide-react";
 
 function formatIDR( amount: number ) {
   return new Intl.NumberFormat( "id-ID", {
@@ -36,10 +36,12 @@ export function TransactionForm( {
   categories,
   feeRules,
   onSuccess,
+  recentTransactions = [],
 }: {
   categories: any[];
   feeRules: any[];
   onSuccess: () => void;
+  recentTransactions?: any[];
 } ) {
   const { data: session } = useSession();
   const [loading, setLoading] = useState( false );
@@ -55,6 +57,13 @@ export function TransactionForm( {
       note         : "",
     },
   } );
+
+  const applySuggestion = ( tx: any ) => {
+    form.setValue( "categoryId", tx.categoryId );
+    form.setValue( "amount", Number( tx.transactionAmount ) );
+    form.setValue( "note", tx.note || "" );
+    toast.success( `Diterapkan: ${tx.category?.name} - ${formatIDR( Number( tx.transactionAmount ) )}` );
+  };
 
   const watchAmount = form.watch( "amount" );
   const watchCategoryId = form.watch( "categoryId" );
@@ -81,6 +90,7 @@ export function TransactionForm( {
             const result = calculateTransaction( watchAmount, matchedTier.formulas );
             setCalcResult( { ...result, appliedRule : `${categoryRule.name} (Tier: ${matchedTier.minAmount}-${matchedTier.maxAmount})` } );
           } catch ( e ) {
+            // eslint-disable-next-line no-console
             console.error( "Formula error", e );
             setCalcResult( null );
           }
@@ -128,12 +138,35 @@ export function TransactionForm( {
     }
   };
 
-  const filteredRules = feeRules.filter( ( r ) => r.categoryId === watchCategoryId );
-
   return (
     <form onSubmit={form.handleSubmit( onSubmit )}
       className="space-y-6"
     >
+      {recentTransactions.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+            Sugesti Terkini
+          </div>
+          <div className="relative">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 w-full">
+              {recentTransactions.map( ( tx, i ) => (
+                <button
+                  key={tx.id || i}
+                  type="button"
+                  onClick={() => applySuggestion( tx )}
+                  className="flex flex-col items-start gap-1 p-2 rounded-lg border bg-muted/30 hover:bg-primary/10 hover:border-primary/30 transition-all min-w-[140px] shrink-0 text-left group"
+                >
+                  <span className="text-[10px] font-bold text-primary truncate w-full">{tx.category?.name}</span>
+                  <span className="text-xs font-bold">{formatIDR( Number( tx.transactionAmount ) )}</span>
+                  <span className="text-[9px] text-muted-foreground group-hover:text-primary/70">Klik untuk salin</span>
+                </button>
+              ) )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Kategori</Label>

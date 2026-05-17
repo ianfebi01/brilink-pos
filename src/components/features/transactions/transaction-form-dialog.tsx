@@ -16,9 +16,10 @@ import { TransactionForm } from "./transaction-form";
 interface TransactionFormDialogProps {
   categories: any[];
   feeRules: any[];
+  recentTransactions?: any[];
 }
 
-export function TransactionFormDialog( { categories, feeRules }: TransactionFormDialogProps ) {
+export function TransactionFormDialog( { categories, feeRules, recentTransactions }: TransactionFormDialogProps ) {
   const [open, setOpen] = useState( false );
 
   return (
@@ -33,7 +34,7 @@ export function TransactionFormDialog( { categories, feeRules }: TransactionForm
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] flex flex-col">
         <DialogHeader>
           <DialogTitle>Buat Transaksi</DialogTitle>
           <DialogDescription>
@@ -43,6 +44,7 @@ export function TransactionFormDialog( { categories, feeRules }: TransactionForm
         <TransactionForm 
           categories={categories} 
           feeRules={feeRules} 
+          recentTransactions={recentTransactions}
           onSuccess={() => setOpen( false )} 
         />
       </DialogContent>

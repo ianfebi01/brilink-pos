@@ -13,6 +13,8 @@ import {
 import { format, isToday, isYesterday } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { ROLES } from "@/lib/rbac";
 
 function formatIDR( amount: number ) {
   return new Intl.NumberFormat( "id-ID", {
@@ -23,6 +25,9 @@ function formatIDR( amount: number ) {
 }
 
 export function TransactionTable( { transactions }: { transactions: any[] } ) {
+  const { data : session } = useSession();
+  const isSuperAdmin = ( session?.user as any )?.role === ROLES.SUPERADMIN;
+
   if ( !transactions.length ) {
     return (
       <div className="rounded-md border p-8 text-center text-muted-foreground">
@@ -50,7 +55,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
             <TableHead>Kategori</TableHead>
             <TableHead className="text-right">Nominal</TableHead>
             <TableHead className="text-right">Fee Pelanggan</TableHead>
-            <TableHead className="text-right">Laba Agen</TableHead>
+            {isSuperAdmin && <TableHead className="text-right">Laba Agen</TableHead>}
             <TableHead className="text-right">Total Bayar</TableHead>
           </TableRow>
         </TableHeader>
@@ -82,7 +87,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right font-bold text-foreground/70"
-                    colSpan={4}
+                    colSpan={isSuperAdmin ? 4 : 3}
                   >
                     {formatIDR( totalAmount )}
                   </TableCell>
@@ -108,11 +113,13 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
                     <TableCell className="text-right text-muted-foreground text-xs">
                       {formatIDR( Number( tx.customerFee ) )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                        +{formatIDR( Number( tx.agentProfit ) )}
-                      </span>
-                    </TableCell>
+                    {isSuperAdmin && (
+                      <TableCell className="text-right">
+                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                          +{formatIDR( Number( tx.agentProfit ) )}
+                        </span>
+                      </TableCell>
+                    )}
                     <TableCell className="text-right font-bold text-primary">
                       {formatIDR( Number( tx.totalPaid ) )}
                     </TableCell>
