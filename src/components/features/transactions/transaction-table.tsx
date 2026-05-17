@@ -42,7 +42,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
   const sortedDates = Object.keys( groups ).sort( ( a, b ) => b.localeCompare( a ) );
 
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
@@ -68,7 +68,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
 
             return (
               <React.Fragment key={date}>
-                <TableRow className="bg-muted/20 hover:bg-muted/30 border-b">
+                <TableRow className="bg-trnsparent hover:bg-muted/30 border-b">
                   <TableCell className="py-2">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-foreground/80">{dateLabel}</span>
@@ -89,7 +89,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
                 </TableRow>
                 {dayTransactions.map( ( tx: any, index: number ) => (
                   <TableRow key={tx.id}
-                    className={cn( "hover:bg-muted/5 transition-colors", index === dayTransactions.length - 1 ? "border-b-2 border-muted" : "border-b" )}
+                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/5" )}
                   >
                     <TableCell className="text-muted-foreground text-xs">
                       {format( new Date( tx.createdAt ), "HH:mm" )}
