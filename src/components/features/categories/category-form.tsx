@@ -19,12 +19,14 @@ export function CategoryForm( {
   initialData,
   onSuccess,
   id,
-  onLoadingChange
+  onLoadingChange,
+  onValidityChange
 }: {
   initialData?: any;
   onSuccess: () => void;
   id?: string;
   onLoadingChange?: ( loading: boolean ) => void;
+  onValidityChange?: ( isValid: boolean ) => void;
 } ) {
   const [loading, setLoading] = useState( false );
 
@@ -39,6 +41,11 @@ export function CategoryForm( {
   useEffect( () => {
     onLoadingChange?.( loading );
   }, [loading, onLoadingChange] );
+
+  const formIsValid = form.formState.isValid;
+  useEffect( () => {
+    onValidityChange?.( formIsValid );
+  }, [formIsValid, onValidityChange] );
 
   const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
@@ -61,7 +68,7 @@ export function CategoryForm( {
   return (
     <form id={id}
       onSubmit={form.handleSubmit( onSubmit )}
-      className="space-y-4"
+      className="space-y-4 grow"
     >
       <div className="space-y-2">
         <Label htmlFor="category-name">Nama Kategori</Label>

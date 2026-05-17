@@ -41,7 +41,7 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
   const sortedDates = Object.keys( groups ).sort( ( a, b ) => b.localeCompare( a ) );
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">

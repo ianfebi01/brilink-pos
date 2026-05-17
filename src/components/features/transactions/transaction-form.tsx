@@ -33,15 +33,21 @@ const formSchema = z.object( {
 type FormValues = z.infer<typeof formSchema>;
 
 export function TransactionForm( {
+  id,
   categories,
   feeRules,
   onSuccess,
   recentTransactions = [],
+  onLoadingChange,
+  onValidityChange,
 }: {
+  id?: string;
   categories: any[];
   feeRules: any[];
   onSuccess: () => void;
   recentTransactions?: any[];
+  onLoadingChange?: ( loading: boolean ) => void;
+  onValidityChange?: ( isValid: boolean ) => void;
 } ) {
   const { data: session } = useSession();
   const [loading, setLoading] = useState( false );
@@ -65,6 +71,19 @@ export function TransactionForm( {
     form.setValue( "note", tx.note || "" );
     toast.success( `Diterapkan: ${tx.category?.name} - ${formatIDR( Number( tx.transactionAmount ) )}` );
   };
+
+  useEffect( () => {
+    if ( onLoadingChange ) {
+      onLoadingChange( loading );
+    }
+  }, [loading, onLoadingChange] );
+
+  useEffect( () => {
+    if ( onValidityChange ) {
+      const isValid = !!calcResult && !calcResult.error;
+      onValidityChange( isValid );
+    }
+  }, [calcResult, onValidityChange] );
 
   const watchAmount = form.watch( "amount" );
   const watchCategoryId = form.watch( "categoryId" );
@@ -140,8 +159,9 @@ export function TransactionForm( {
   };
 
   return (
-    <form onSubmit={form.handleSubmit( onSubmit )}
-      className="space-y-6"
+    <form id={id}
+      onSubmit={form.handleSubmit( onSubmit )}
+      className="space-y-6 flex flex-col grow"
     >
       {recentTransactions.length > 0 && (
         <div className="space-y-2">
@@ -168,7 +188,7 @@ export function TransactionForm( {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Kategori</Label>
           <Select value={watchCategoryId}
@@ -267,19 +287,6 @@ export function TransactionForm( {
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline"
-          type="button"
-          onClick={onSuccess}
-        >
-          Batal
-        </Button>
-        <Button type="submit"
-          disabled={loading || !calcResult || calcResult.error}
-        >
-          {loading ? "Menyimpan..." : "Simpan Transaksi"}
-        </Button>
-      </div>
     </form>
   );
 }

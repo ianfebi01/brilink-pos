@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,7 +19,17 @@ const formSchema = z.object( {
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
+export function InvestmentForm( { 
+  id,
+  onSuccess,
+  onLoadingChange,
+  onValidityChange,
+}: { 
+  id?: string;
+  onSuccess: () => void;
+  onLoadingChange?: ( loading: boolean ) => void;
+  onValidityChange?: ( isValid: boolean ) => void;
+} ) {
   const { data: session } = useSession();
   const [loading, setLoading] = useState( false );
 
@@ -32,6 +42,20 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
       note   : "",
     },
   } );
+
+  const formIsValid = form.formState.isValid;
+
+  useEffect( () => {
+    if ( onLoadingChange ) {
+      onLoadingChange( loading );
+    }
+  }, [loading, onLoadingChange] );
+
+  useEffect( () => {
+    if ( onValidityChange ) {
+      onValidityChange( formIsValid );
+    }
+  }, [formIsValid, onValidityChange] );
 
   const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
@@ -52,8 +76,9 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit( onSubmit )}
-      className="space-y-4 pt-4"
+    <form id={id}
+      onSubmit={form.handleSubmit( onSubmit )}
+      className="space-y-4 pt-4 flex flex-col grow"
     >
       <div className="space-y-2">
         <Label>Tanggal</Label>
@@ -87,13 +112,6 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
         )}
       </div>
 
-      <div className="flex justify-end pt-4">
-        <Button type="submit"
-          disabled={loading}
-        >
-          {loading ? "Menyimpan..." : "Simpan Investasi"}
-        </Button>
-      </div>
     </form>
   );
 }

@@ -198,8 +198,8 @@ function FormulaFieldBuilder( { label, value, onChange }: { label: string, value
   const expr = value?.expression || "";
 
   return (
-    <div className="grid grid-cols-12 gap-2 items-end border p-3 rounded-md bg-muted/20">
-      <div className="col-span-3">
+    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:items-end border p-3 rounded-md bg-muted/20">
+      <div className="col-span-1 sm:col-span-3">
         <Label className="text-xs mb-1 block">{label}</Label>
         <Select value={type}
           onValueChange={( t ) => onChange( { ...value, type : t } )}
@@ -216,7 +216,7 @@ function FormulaFieldBuilder( { label, value, onChange }: { label: string, value
           </SelectContent>
         </Select>
       </div>
-      <div className="col-span-9">
+      <div className="col-span-1 sm:col-span-9">
         {type === "formula" ? (
           <div className="w-full">
             <Label className="text-xs mb-1 block text-muted-foreground">Pembuat Ekspresi</Label>
@@ -247,14 +247,16 @@ export function FeeRuleForm( {
   initialData,
   existingCategoryIds = [],
   id,
-  onLoadingChange
+  onLoadingChange,
+  onValidityChange
 }: { 
   categories: any[], 
   onSuccess: () => void, 
   initialData?: any,
   existingCategoryIds?: string[],
   id?: string,
-  onLoadingChange?: ( loading: boolean ) => void
+  onLoadingChange?: ( loading: boolean ) => void,
+  onValidityChange?: ( isValid: boolean ) => void
 } ) {
   const [loading, setLoading] = useState( false );
 
@@ -281,6 +283,11 @@ export function FeeRuleForm( {
     control : form.control,
     name    : "tiers"
   } );
+
+  const formIsValid = form.formState.isValid;
+  useEffect( () => {
+    onValidityChange?.( formIsValid );
+  }, [formIsValid, onValidityChange] );
 
   useEffect( () => {
     onLoadingChange?.( loading );
@@ -323,9 +330,9 @@ export function FeeRuleForm( {
   return (
     <form id={id}
       onSubmit={form.handleSubmit( onSubmit )}
-      className="space-y-6"
+      className="space-y-6 flex flex-col grow"
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Category</Label>
           <Select value={watchCategoryId}
@@ -400,7 +407,7 @@ export function FeeRuleForm( {
                 )}
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs">Nominal Minimal</Label>
                   <Input type="number"

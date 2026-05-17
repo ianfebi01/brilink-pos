@@ -10,6 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { TransactionForm } from "./transaction-form";
 
@@ -21,6 +23,9 @@ interface TransactionFormDialogProps {
 
 export function TransactionFormDialog( { categories, feeRules, recentTransactions }: TransactionFormDialogProps ) {
   const [open, setOpen] = useState( false );
+  const [formLoading, setFormLoading] = useState( false );
+  const [formValid, setFormValid] = useState( false );
+  const formId = "transaction-form";
 
   return (
     <Dialog open={open}
@@ -34,19 +39,34 @@ export function TransactionFormDialog( { categories, feeRules, recentTransaction
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[600px] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="w-full max-w-full h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[calc(100vh-4rem)] p-4 sm:p-6 rounded-none sm:rounded-xl overflow-y-auto sm:max-w-[600px] flex flex-col">
+        <DialogHeader className="-mx-4 -mt-4 mb-4 px-4 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-6 border-b bg-muted/30 shrink-0">
           <DialogTitle>Buat Transaksi</DialogTitle>
           <DialogDescription>
             Masukkan rincian transaksi. Biaya fee akan dihitung secara otomatis berdasarkan aturan yang berlaku.
           </DialogDescription>
         </DialogHeader>
-        <TransactionForm 
-          categories={categories} 
-          feeRules={feeRules} 
-          recentTransactions={recentTransactions}
-          onSuccess={() => setOpen( false )} 
-        />
+        <div className="-mx-4 no-scrollbar overflow-y-auto px-4 grow flex flex-col">
+          <TransactionForm 
+            id={formId}
+            categories={categories} 
+            feeRules={feeRules} 
+            recentTransactions={recentTransactions}
+            onSuccess={() => setOpen( false )} 
+            onLoadingChange={setFormLoading}
+            onValidityChange={setFormValid}
+          />
+        </div>
+        <DialogFooter className="-mx-4 -mb-4 mt-auto px-4 py-4 sm:-mx-6 sm:-mb-6 sm:px-6 sm:py-4 border-t bg-muted/30 shrink-0">
+          <DialogClose render={<Button variant="outline">Batal</Button>} />
+          <Button 
+            form={formId} 
+            type="submit" 
+            disabled={formLoading || !formValid}
+          >
+            {formLoading ? "Menyimpan..." : "Simpan Transaksi"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
