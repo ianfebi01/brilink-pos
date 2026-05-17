@@ -2,6 +2,15 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
+async function checkSuperAdmin() {
+  const session = await getServerSession( authOptions );
+  if ( ( session?.user as any )?.role !== "superadmin" ) {
+    throw new Error( "Unauthorized: Super Admin access required" );
+  }
+}
 
 export async function getCategories() {
   try {
@@ -42,6 +51,7 @@ export async function createFeeRule( data: {
   formulaJson: any[]; // Array of tiers
 } ) {
   try {
+    await checkSuperAdmin();
     // 1. Check for category uniqueness
     const existing = await prisma.feeRule.findUnique( {
       where : { categoryId : data.categoryId },
@@ -85,6 +95,7 @@ function validateTiers( tiers: any[] ) {
 
 export async function deleteFeeRule( id: string ) {
   try {
+    await checkSuperAdmin();
     await prisma.feeRule.delete( { where : { id } } );
     revalidatePath( "/fee-rules" );
     
@@ -121,6 +132,7 @@ export async function updateFeeRule( id: string, data: {
   formulaJson: any[];
 } ) {
   try {
+    await checkSuperAdmin();
     // Validate tiers
     validateTiers( data.formulaJson );
 

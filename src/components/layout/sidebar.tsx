@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ReceiptText, Settings, PiggyBank, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
+import { useSession, signOut } from "next-auth/react";
+import { ROLES, ROUTE_PERMISSIONS } from "@/lib/rbac";
+import { Button } from "../ui/button";
 
 const navItems = [
   { name : "Dashboard", href : "/", icon : LayoutDashboard },
@@ -13,6 +14,18 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data : session } = useSession();
+  const userRole = ( session?.user as any )?.role || ROLES.ADMIN;
+
+  const filteredItems = navItems.filter( item => {
+    const allowedRoutes = ROUTE_PERMISSIONS[userRole as keyof typeof ROUTE_PERMISSIONS] || [];
+    
+    return allowedRoutes.some( route => {
+      if ( route === "/" ) return item.href === "/";
+      
+      return item.href.startsWith( route );
+    } );
+  } );
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
@@ -20,7 +33,7 @@ export function Sidebar() {
         <h1 className="text-lg font-bold text-sidebar-foreground">BRILink Admin</h1>
       </div>
       <nav className="flex-1 space-y-1 p-2">
-        {navItems.map( ( item ) => {
+        {filteredItems.map( ( item ) => {
           const isActive = pathname === item.href || pathname.startsWith( `${item.href}/` ) && item.href !== "/";
           
           return (

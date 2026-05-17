@@ -172,32 +172,41 @@ export function TransactionForm( {
 
       {calcResult && !calcResult.error && (
         <div className="bg-muted/30 p-4 rounded-lg border border-primary/10 space-y-3">
-          <h4 className="text-sm font-bold text-primary flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Rincian Perhitungan
-          </h4>
-          <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Nominal:</span>
-              <span className="font-medium text-foreground">{formatIDR( watchAmount )}</span>
+          {( session?.user as any )?.role === "superadmin" ? (
+            <>
+              <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                Rincian Perhitungan
+              </h4>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Nominal:</span>
+                  <span className="font-medium text-foreground">{formatIDR( watchAmount )}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Fee Pelanggan:</span>
+                  <span className="font-medium text-blue-600">+{formatIDR( calcResult.customer_fee )}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground border-t pt-1.5 mt-1.5">
+                  <span>Fee BRI (internal):</span>
+                  <span className="font-medium text-red-600">-{formatIDR( calcResult.bri_fee )}</span>
+                </div>
+                <div className="flex justify-between text-primary font-bold text-base border-t border-primary/20 pt-1.5 mt-1.5">
+                  <span>Laba Agen:</span>
+                  <span>{formatIDR( calcResult.agent_profit )}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground text-xs pt-1 mt-2 border-t border-dashed">
+                  <span>Total yang Harus Dibayar:</span>
+                  <span className="font-semibold">{formatIDR( calcResult.total_paid )}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-between items-center py-1">
+              <span className="text-sm font-semibold text-muted-foreground">Total yang Harus Dibayar:</span>
+              <span className="text-xl font-bold text-primary">{formatIDR( calcResult.total_paid )}</span>
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Fee Pelanggan:</span>
-              <span className="font-medium text-blue-600">+{formatIDR( calcResult.customer_fee )}</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground border-t pt-1.5 mt-1.5">
-              <span>Fee BRI (internal):</span>
-              <span className="font-medium text-red-600">-{formatIDR( calcResult.bri_fee )}</span>
-            </div>
-            <div className="flex justify-between text-primary font-bold text-base border-t border-primary/20 pt-1.5 mt-1.5">
-              <span>Laba Agen:</span>
-              <span>{formatIDR( calcResult.agent_profit )}</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground text-xs pt-1 mt-2 border-t border-dashed">
-              <span>Total yang Harus Dibayar:</span>
-              <span className="font-semibold">{formatIDR( calcResult.total_paid )}</span>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
