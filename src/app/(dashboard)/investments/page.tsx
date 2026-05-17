@@ -4,6 +4,7 @@ import { InvestmentFormDialog } from "@/components/features/investments/investme
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { TransitionWrapper } from "@/components/layout/transition-wrapper";
 
 export default async function InvestmentsPage() {
   const session = await getServerSession( authOptions );
@@ -23,17 +24,21 @@ export default async function InvestmentsPage() {
   const { investments } = res;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Investasi Harian</h2>
-          <p className="text-muted-foreground">
-            Pantau penambahan modal saldo BRILink Anda.
-          </p>
+    <TransitionWrapper>
+      <div className="space-y-6">
+        <div className="animate-item flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Investasi Harian</h2>
+            <p className="text-muted-foreground">
+              Pantau penambahan modal saldo BRILink Anda.
+            </p>
+          </div>
+          <InvestmentFormDialog />
         </div>
-        <InvestmentFormDialog />
+        <div className="animate-item">
+          <InvestmentsTable investments={investments || []} />
+        </div>
       </div>
-      <InvestmentsTable investments={investments || []} />
-    </div>
+    </TransitionWrapper>
   );
 }

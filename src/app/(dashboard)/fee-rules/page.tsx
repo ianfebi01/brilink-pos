@@ -4,6 +4,7 @@ import { FeeRuleFormDialog } from "@/components/features/fee-rules/fee-rule-form
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { TransitionWrapper } from "@/components/layout/transition-wrapper";
 
 export default async function FeeRulesPage() {
   const session = await getServerSession( authOptions );
@@ -20,22 +21,26 @@ export default async function FeeRulesPage() {
   if ( !catRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading categories: {catRes.error}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Aturan Fee</h2>
-          <p className="text-muted-foreground">
-            Kelola aturan fee perhitungan otomatis untuk setiap kategori transaksi.
-          </p>
+    <TransitionWrapper>
+      <div className="space-y-6">
+        <div className="animate-item flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Aturan Fee</h2>
+            <p className="text-muted-foreground">
+              Kelola aturan fee perhitungan otomatis untuk setiap kategori transaksi.
+            </p>
+          </div>
+          <FeeRuleFormDialog 
+            categories={catRes.categories || []} 
+            existingCategoryIds={rulesRes.rules?.map( ( r: any ) => r.categoryId ) || []}
+          />
         </div>
-        <FeeRuleFormDialog 
-          categories={catRes.categories || []} 
-          existingCategoryIds={rulesRes.rules?.map( ( r: any ) => r.categoryId ) || []}
-        />
+        <div className="animate-item">
+          <FeeRulesTable rules={rulesRes.rules || []}
+            categories={catRes.categories || []}
+          />
+        </div>
       </div>
-      <FeeRulesTable rules={rulesRes.rules || []}
-        categories={catRes.categories || []}
-      />
-    </div>
+    </TransitionWrapper>
   );
 }
