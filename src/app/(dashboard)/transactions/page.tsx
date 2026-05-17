@@ -3,9 +3,19 @@ import { getFeeRules, getCategories } from "@/actions/fee-rules";
 import { TransactionTable } from "@/components/features/transactions/transaction-table";
 import { TransactionFormDialog } from "@/components/features/transactions/transaction-form-dialog";
 
-export default async function TransactionsPage() {
+export default async function TransactionsPage( {
+  searchParams,
+}: {
+  searchParams: { page?: string; q?: string };
+} ) {
+  const params = await searchParams;
+  const page = Number( params.page ) || 1;
+  const limit = 20;
+  const offset = ( page - 1 ) * limit;
+  const query = params.q || "";
+
   const [txRes, catRes, ruleRes] = await Promise.all( [
-    getTransactions( 50, 0 ),
+    getTransactions( limit, offset, query ),
     getCategories(),
     getFeeRules()
   ] );
@@ -23,13 +33,20 @@ export default async function TransactionsPage() {
             Kelola transaksi harian Anda di sini.
           </p>
         </div>
-        <TransactionFormDialog 
-          categories={catRes.categories || []} 
-          feeRules={ruleRes.rules || []} 
-          recentTransactions={( txRes.transactions || [] ).slice( 0, 5 )}
-        />
+        <div className="flex items-center gap-2">
+          <TransactionFormDialog 
+            categories={catRes.categories || []} 
+            feeRules={ruleRes.rules || []} 
+            recentTransactions={( txRes.transactions || [] ).slice( 0, 5 )}
+          />
+        </div>
       </div>
-      <TransactionTable transactions={txRes.transactions || []} />
+      <TransactionTable 
+        transactions={txRes.transactions || []} 
+        total={txRes.total || 0}
+        page={page}
+        limit={limit}
+      />
     </div>
   );
 }

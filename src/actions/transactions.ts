@@ -58,16 +58,27 @@ export async function createTransaction( data: {
   }
 }
 
-export async function getTransactions( limit = 50, offset = 0 ) {
+export async function getTransactions( limit = 50, offset = 0, query?: string ) {
   try {
     const session = await getServerSession( authOptions );
     const userRole = ( session?.user as any )?.role;
 
-    let where = {};
+    let where: any = {};
+    
+    if ( query ) {
+      where.OR = [
+        { customerName : { contains : query, mode : "insensitive" } },
+        { note : { contains : query, mode : "insensitive" } },
+      ];
+    }
+
     if ( userRole === "admin" ) {
       const today = new Date();
       today.setHours( 0, 0, 0, 0 );
-      where = { createdAt : { gte : today } };
+      where = { 
+        ...where,
+        createdAt : { gte : today } 
+      };
     }
 
     const [transactions, total] = await Promise.all( [
@@ -102,7 +113,9 @@ export async function getTransactions( limit = 50, offset = 0 ) {
     } ) );
     
     return { success : true, transactions : serializedTransactions, total };
-  } catch ( error: any ) {
+  } catch ( error : any ) {
+    console.error( error );
+    
     return { success : false, error : error.message };
   }
 }
