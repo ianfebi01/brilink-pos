@@ -23,10 +23,10 @@ type LoginValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState( false );
-  const containerRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
-  const bannerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>( null );
+  const formRef = useRef<HTMLDivElement>( null );
+  const bannerRef = useRef<HTMLDivElement>( null );
+  const textRef = useRef<HTMLDivElement>( null );
 
   const {
     register,
@@ -36,52 +36,52 @@ export default function LoginPage() {
     resolver : zodResolver( loginSchema ),
   } );
 
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
+  useLayoutEffect( () => {
+    const ctx = gsap.context( () => {
       // Set initial states to avoid SSR flicker
-      gsap.set([bannerRef.current, formRef.current, ".animate-item", textRef.current], {
-        opacity: 0,
-      });
-      gsap.set([".animate-item", textRef.current], {
-        y: 20,
-      });
+      gsap.set( [bannerRef.current, formRef.current, ".animate-item", textRef.current], {
+        opacity : 0,
+      } );
+      gsap.set( [".animate-item", textRef.current], {
+        y : 20,
+      } );
 
       // Entrance animations using .to()
-      gsap.to(bannerRef.current, {
-        duration: 1,
-        opacity: 1,
-        ease: "power2.out",
-      });
+      gsap.to( bannerRef.current, {
+        duration : 1,
+        opacity  : 1,
+        ease     : "power2.out",
+      } );
 
-      gsap.to(formRef.current, {
-        duration: 1,
-        opacity: 1,
-        ease: "power2.out",
-        delay: 0.1,
-      });
+      gsap.to( formRef.current, {
+        duration : 1,
+        opacity  : 1,
+        ease     : "power2.out",
+        delay    : 0.1,
+      } );
 
-      gsap.to(".animate-item", {
-        duration: 0.6,
-        y: 0,
-        opacity: 1,
-        stagger: 0.08,
-        ease: "power2.out",
-        delay: 0.3,
-        clearProps: "all",
-      });
+      gsap.to( ".animate-item", {
+        duration   : 0.6,
+        y          : 0,
+        opacity    : 1,
+        stagger    : 0.08,
+        ease       : "power2.out",
+        delay      : 0.3,
+        clearProps : "all",
+      } );
 
-      gsap.to(textRef.current, {
-        duration: 0.8,
-        y: 0,
-        opacity: 1,
-        ease: "power2.out",
-        delay: 0.5,
-        clearProps: "all",
-      });
-    }, containerRef);
+      gsap.to( textRef.current, {
+        duration   : 0.8,
+        y          : 0,
+        opacity    : 1,
+        ease       : "power2.out",
+        delay      : 0.5,
+        clearProps : "all",
+      } );
+    }, containerRef );
 
     return () => ctx.revert();
-  }, []);
+  }, [] );
 
   const onSubmit = async ( values: LoginValues ) => {
     setLoading( true );
@@ -104,14 +104,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div ref={containerRef} className="relative flex min-h-screen w-full overflow-hidden bg-background">
+    <div ref={containerRef}
+      className="relative flex min-h-screen w-full overflow-hidden bg-background"
+    >
       {/* Left Column: Gradient Banner */}
       <div 
         ref={bannerRef}
         className="relative hidden min-h-screen w-1/2 flex-col bg-linear-to-br from-primary via-primary/90 to-primary/70 lg:flex"
       >
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
-        <div ref={textRef} className="relative z-10 mt-auto p-16 text-white">
+        <div ref={textRef}
+          className="relative z-10 mt-auto p-16 text-white"
+        >
           <div className="space-y-4">
             <div className="h-1 w-20 bg-white/30 rounded-full" />
             <h1 className="text-5xl font-bold tracking-tight leading-tight">
@@ -145,7 +149,9 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit( onSubmit )}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="animate-item">Nama Pengguna</Label>
+                <Label htmlFor="username"
+                  className="animate-item"
+                >Nama Pengguna</Label>
                 <Input
                   id="username"
                   type="text"
@@ -158,7 +164,9 @@ export default function LoginPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="animate-item">Kata Sandi</Label>
+                <Label htmlFor="password"
+                  className="animate-item"
+                >Kata Sandi</Label>
                 <Input
                   id="password"
                   type="password"
@@ -170,12 +178,14 @@ export default function LoginPage() {
                   <p className="animate-item text-sm text-destructive">{errors.password.message}</p>
                 )}
               </div>
-              <Button className="animate-item w-full"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? "Mengautentikasi..." : "Masuk ke Sistem"}
-              </Button>
+              <div className="animate-item">
+                <Button className="w-full"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? "Mengautentikasi..." : "Masuk ke Sistem"}
+                </Button>
+              </div>
             </CardContent>
           </form>
         </Card>
