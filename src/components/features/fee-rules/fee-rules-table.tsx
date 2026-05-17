@@ -51,10 +51,10 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-xl border bg-card overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow>
+        <TableHeader className="bg-muted/50">
+          <TableRow className="hover:bg-transparent border-none">
             <TableHead>Name</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Amount Range</TableHead>
