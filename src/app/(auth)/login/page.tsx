@@ -38,35 +38,45 @@ export default function LoginPage() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Entrance animations
-      gsap.from(bannerRef.current, {
-        duration: 1,
+      // Set initial states to avoid SSR flicker
+      gsap.set([bannerRef.current, formRef.current, ".animate-item", textRef.current], {
         opacity: 0,
+      });
+      gsap.set([".animate-item", textRef.current], {
+        y: 20,
+      });
+
+      // Entrance animations using .to()
+      gsap.to(bannerRef.current, {
+        duration: 1,
+        opacity: 1,
         ease: "power2.out",
       });
 
-      gsap.from(formRef.current, {
+      gsap.to(formRef.current, {
         duration: 1,
-        opacity: 0,
+        opacity: 1,
         ease: "power2.out",
         delay: 0.1,
       });
 
-      gsap.from(".animate-item", {
+      gsap.to(".animate-item", {
         duration: 0.6,
-        y: 15,
-        opacity: 0,
+        y: 0,
+        opacity: 1,
         stagger: 0.08,
         ease: "power2.out",
         delay: 0.3,
+        clearProps: "all",
       });
 
-      gsap.from(textRef.current, {
+      gsap.to(textRef.current, {
         duration: 0.8,
-        y: 20,
-        opacity: 0,
+        y: 0,
+        opacity: 1,
         ease: "power2.out",
         delay: 0.5,
+        clearProps: "all",
       });
     }, containerRef);
 
