@@ -64,44 +64,81 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
 
             return (
               <TableRow key={rule.id}
-                className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
+                className={cn( "hover:bg-primary/5 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/30" )}
               >
-                <TableCell className="font-medium">{rule.name}</TableCell>
-                <TableCell>{rule.category?.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex flex-col">
+                    <span className="text-sm">{rule.name}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rule ID: {rule.id.slice(-6)}</span>
+                  </div>
+                </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1">
-                    {tiers.map( ( t: any, i: number ) => (
-                      <span key={i}
-                        className="text-[10px] text-muted-foreground whitespace-nowrap"
-                      >
-                        T{i + 1}: {t.minAmount.toLocaleString()} - {t.maxAmount.toLocaleString()}
-                      </span>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                    {rule.category?.name}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1.5">
+                    {tiers.slice(0, 3).map( ( t: any, i: number ) => (
+                      <div key={i} className="flex items-center gap-2 group">
+                        <span className="text-[9px] font-bold text-muted-foreground bg-muted px-1 rounded">T{i + 1}</span>
+                        <span className="text-[11px] text-foreground font-medium">
+                          {Number(t.minAmount).toLocaleString('id-ID')} - {t.maxAmount ? Number(t.maxAmount).toLocaleString('id-ID') : "∞"}
+                        </span>
+                      </div>
                     ) )}
+                    {tierCount > 3 && (
+                      <span className="text-[10px] italic text-muted-foreground pl-5">
+                        +{tierCount - 3} tingkatan lainnya
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="max-w-md">
-                  <div className="flex flex-col gap-2">
-                    {tiers.slice( 0, 2 ).map( ( tier: any, i: number ) => (
-                      <div key={i}
-                        className="flex flex-wrap gap-1 border-l-2 border-primary/20 pl-2"
-                      >
-                        {Object.entries( tier.formulas || {} ).map( ( [k, v]: [string, any] ) => {
-                          let display = "";
-                          if ( v.type === "fixed" ) display = `Rp${v.value}`;
-                          else if ( v.type === "percentage" ) display = `${v.value}%`;
-                          else if ( v.type === "formula" ) display = v.expression;
-                          
-                          return (
-                            <span key={k}
-                              className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[9px] font-medium text-muted-foreground capitalize"
-                            >
-                              {k.replace( /_/g, ' ' )}: {display}
-                            </span>
-                          );
-                        } )}
+                  <div className="flex flex-col gap-3 py-1">
+                    {tiers.slice( 0, 1 ).map( ( tier: any, i: number ) => (
+                      <div key={i} className="space-y-1.5">
+                        <div className="flex flex-wrap gap-1.5">
+                          {Object.entries( tier.formulas || {} ).map( ( [k, v]: [string, any] ) => {
+                            let display = "";
+                            if ( v.type === "fixed" ) display = `Rp${Number(v.value).toLocaleString('id-ID')}`;
+                            else if ( v.type === "percentage" ) display = `${v.value}%`;
+                            else if ( v.type === "formula" ) display = "ƒ(x)";
+
+                            const colors: Record<string, string> = {
+                              customer_fee : "bg-blue-100 text-blue-700 border-blue-200",
+                              bri_fee      : "bg-orange-100 text-orange-700 border-orange-200",
+                              agent_profit : "bg-emerald-100 text-emerald-700 border-emerald-200",
+                              total_paid   : "bg-indigo-100 text-indigo-700 border-indigo-200",
+                            };
+
+                            const labels: Record<string, string> = {
+                              customer_fee : "Fee Pelanggan",
+                              bri_fee      : "Fee BRI",
+                              agent_profit : "Laba Agen",
+                              total_paid   : "Total Bayar",
+                            };
+
+                            return (
+                              <div key={k}
+                                className={cn(
+                                  "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                                  colors[k] || "bg-muted text-muted-foreground border-transparent"
+                                )}
+                              >
+                                <span className="opacity-70 mr-1">{labels[k] || k}:</span>
+                                {display}
+                              </div>
+                            );
+                          } )}
+                        </div>
                       </div>
                     ) )}
-                    {tierCount > 2 && <span className="text-[10px] italic text-muted-foreground">...dan {tierCount - 2} tingkatan lainnya</span>}
+                    {tierCount > 1 && (
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground italic border-t pt-1 border-dashed">
+                        <span>Konfigurasi bervariasi di tiap tingkatan nominal</span>
+                      </div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
