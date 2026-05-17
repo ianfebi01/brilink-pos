@@ -134,6 +134,11 @@ export function TransactionTable( {
                                     • {tx.customerName}
                                 </span>
                               )}
+                              {tx.note && (
+                                <span className="text-[9px] text-muted-foreground uppercase truncate max-w-[100px]">
+                                    • {tx.note}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </TableCell>
