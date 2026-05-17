@@ -119,6 +119,7 @@ export async function getTransactions( limit = 50, offset = 0, query?: string, f
     
     return { success : true, transactions : serializedTransactions, total };
   } catch ( error : any ) {
+    // eslint-disable-next-line no-console
     console.error( error );
     
     return { success : false, error : error.message };
@@ -217,7 +218,14 @@ export async function getDashboardStats( period: "daily" | "monthly" = "daily" )
       totalTransactionAmount : Number( txSum._sum.transactionAmount || 0 ),
       totalInvestments       : Number( investmentsSum._sum.amount || 0 ),
       remainingInvestment    : Number( investmentsSum._sum.amount || 0 ) - Number( txSum._sum.transactionAmount || 0 ),
-      recentTransactions,
+      recentTransactions     : recentTransactions.map( ( tx ) => ( {
+        ...tx,
+        transactionAmount : Number( tx.transactionAmount ),
+        customerFee       : Number( tx.customerFee ),
+        briFee            : Number( tx.briFee ),
+        agentProfit       : Number( tx.agentProfit ),
+        totalPaid         : Number( tx.totalPaid ),
+      } ) ),
       chartData,
     },
   };
@@ -248,7 +256,14 @@ export async function updateTransaction( id: string, data: {
 
     return { 
       success     : true, 
-      transaction : JSON.parse( JSON.stringify( transaction ) ) 
+      transaction : {
+        ...transaction,
+        transactionAmount : Number( transaction.transactionAmount ),
+        customerFee       : Number( transaction.customerFee ),
+        briFee            : Number( transaction.briFee ),
+        agentProfit       : Number( transaction.agentProfit ),
+        totalPaid         : Number( transaction.totalPaid ),
+      }
     };
   } catch ( error: any ) {
     return { success : false, error : error.message };
