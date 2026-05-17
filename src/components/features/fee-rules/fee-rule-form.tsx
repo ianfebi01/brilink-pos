@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createFeeRule, updateFeeRule } from "@/actions/fee-rules";
 import { toast } from "sonner";
-import { FormulaType } from "@/features/formulas/engine";
 import { X, Trash2 } from "lucide-react";
 
 const VARIABLES = [
@@ -24,6 +26,31 @@ const OPERATORS = [
   { key : "*", label : "×" },
   { key : "/", label : "÷" },
 ];
+
+const formulaSchema = z.object( {
+  type       : z.enum( ["fixed", "percentage", "formula"] ),
+  value      : z.number().optional(),
+  expression : z.string().optional(),
+} );
+
+const tierSchema = z.object( {
+  minAmount : z.number().min( 0 ),
+  maxAmount : z.number().min( 1 ),
+  formulas  : z.object( {
+    customer_fee : formulaSchema,
+    bri_fee      : formulaSchema,
+    agent_profit : formulaSchema,
+    total_paid   : formulaSchema,
+  } ),
+} );
+
+const formSchema = z.object( {
+  categoryId : z.string().min( 1, "Kategori wajib diisi" ),
+  name       : z.string().min( 2, "Nama minimal 2 karakter" ),
+  tiers      : z.array( tierSchema ).min( 1, "Minimal satu tingkatan (tier) harus ada" ),
+} );
+
+type FormValues = z.infer<typeof formSchema>;
 
 function ExpressionBuilder( { value, onChange }: { value: string, onChange: ( v: string ) => void } ) {
   const tokens = value ? value.replace( /\s+/g, '' ).split( /([+\-*/()])/ ).filter( t => t.length > 0 ) : [];
@@ -142,14 +169,7 @@ function ExpressionBuilder( { value, onChange }: { value: string, onChange: ( v:
   );
 }
 
-interface FormulaBuilderProps {
-  label: string;
-  fieldKey: string;
-  value: any;
-  onChange: ( key: string, val: any ) => void;
-}
-
-function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuilderProps ) {
+function FormulaFieldBuilder( { label, value, onChange }: { label: string, value: any, onChange: ( val: any ) => void } ) {
   const type = value?.type || "fixed";
   const val = value?.value || 0;
   const expr = value?.expression || "";
@@ -159,7 +179,7 @@ function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuild
       <div className="col-span-3">
         <Label className="text-xs mb-1 block">{label}</Label>
         <Select value={type}
-          onValueChange={( t ) => onChange( fieldKey, { ...value, type : t } )}
+          onValueChange={( t ) => onChange( { ...value, type : t } )}
         >
           <SelectTrigger className="h-8 text-xs">
             <SelectValue>
@@ -179,7 +199,7 @@ function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuild
             <Label className="text-xs mb-1 block text-muted-foreground">Pembuat Ekspresi</Label>
             <ExpressionBuilder 
               value={expr} 
-              onChange={( newExpr ) => onChange( fieldKey, { ...value, expression : newExpr } )} 
+              onChange={( newExpr ) => onChange( { ...value, expression : newExpr } )} 
             />
           </div>
         ) : (
@@ -189,7 +209,7 @@ function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuild
               type="number" 
               className="h-8 text-xs" 
               value={val} 
-              onChange={( e ) => onChange( fieldKey, { ...value, value : Number( e.target.value ) } )} 
+              onChange={( e ) => onChange( { ...value, value : Number( e.target.value ) } )} 
             />
           </div>
         )}
@@ -215,22 +235,6 @@ export function FeeRuleForm( {
 } ) {
   const [loading, setLoading] = useState( false );
 
-  useEffect( () => {
-    onLoadingChange?.( loading );
-  }, [loading, onLoadingChange] );
-
-  const [categoryId, setCategoryId] = useState( initialData?.categoryId || "" );
-  const [name, setName] = useState( initialData?.name || "" );
-
-  const isEditing = !!initialData?.id;
-
-  // Filter out categories that already have rules, BUT keep the current category if editing
-  const availableCategories = categories.filter( ( c ) => {
-    if ( isEditing && c.id === initialData.categoryId ) return true;
-    
-    return !existingCategoryIds.includes( c.id );
-  } );
-
   const defaultFormulas = {
     customer_fee : { type : "fixed", value : 10000 },
     bri_fee      : { type : "fixed", value : 5000 },
@@ -238,63 +242,42 @@ export function FeeRuleForm( {
     total_paid   : { type : "formula", expression : "amount + customer_fee" }
   };
 
-  const [tiers, setTiers] = useState<any[]>(
-    initialData?.formulaJson 
-      ? ( typeof initialData.formulaJson === "string" ? JSON.parse( initialData.formulaJson ) : initialData.formulaJson )
-      : [{ minAmount : 0, maxAmount : 1000000, formulas : defaultFormulas }]
-  );
-
-  const addTier = () => {
-    const lastTier = tiers[tiers.length - 1];
-    const newMin = lastTier ? Number( lastTier.maxAmount ) + 1 : 0;
-    
-    setTiers( prev => [
-      ...prev, 
-      { 
-        minAmount : newMin, 
-        maxAmount : newMin + 1000000, 
-        formulas  : { ...defaultFormulas } 
-      }
-    ] );
-  };
-
-  const removeTier = ( index: number ) => {
-    setTiers( prev => prev.filter( ( _, i ) => i !== index ) );
-  };
-
-  const handleTierChange = ( index: number, field: string, value: any ) => {
-    setTiers( prev => {
-      const newTiers = [...prev];
-      if ( field === "formulas" ) {
-        newTiers[index].formulas = { ...newTiers[index].formulas, ...value };
-      } else {
-        newTiers[index][field] = value;
-      }
-      
-      return newTiers;
-    } );
-  };
-
-  const handleSubmit = async ( e: React.FormEvent ) => {
-    e.preventDefault();
-    if ( !categoryId || !name ) {
-      toast.error( "Kategori dan nama wajib diisi" );
-      
-      return;
+  const form = useForm<FormValues>( {
+    resolver      : zodResolver( formSchema ),
+    mode          : "onBlur",
+    defaultValues : {
+      categoryId : initialData?.categoryId || "",
+      name       : initialData?.name || "",
+      tiers      : initialData?.formulaJson 
+        ? ( typeof initialData.formulaJson === "string" ? JSON.parse( initialData.formulaJson ) : initialData.formulaJson )
+        : [{ minAmount : 0, maxAmount : 1000000, formulas : defaultFormulas }]
     }
+  } );
 
+  const { fields, append, remove } = useFieldArray( {
+    control : form.control,
+    name    : "tiers"
+  } );
+
+  useEffect( () => {
+    onLoadingChange?.( loading );
+  }, [loading, onLoadingChange] );
+
+  const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
-    const payload = {
-      categoryId,
-      name,
-      formulaJson : tiers
-    };
-
     let res;
     if ( initialData?.id ) {
-      res = await updateFeeRule( initialData.id, payload );
+      res = await updateFeeRule( initialData.id, {
+        categoryId  : values.categoryId,
+        name        : values.name,
+        formulaJson : values.tiers
+      } );
     } else {
-      res = await createFeeRule( payload );
+      res = await createFeeRule( {
+        categoryId  : values.categoryId,
+        name        : values.name,
+        formulaJson : values.tiers
+      } );
     }
     setLoading( false );
 
@@ -306,21 +289,29 @@ export function FeeRuleForm( {
     }
   };
 
+  const watchCategoryId = form.watch( "categoryId" );
+
+  const availableCategories = categories.filter( ( c ) => {
+    if ( !!initialData?.id && c.id === initialData.categoryId ) return true;
+    
+    return !existingCategoryIds.includes( c.id );
+  } );
+
   return (
     <form id={id}
-      onSubmit={handleSubmit}
+      onSubmit={form.handleSubmit( onSubmit )}
       className="space-y-6"
     >
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Category</Label>
-          <Select value={categoryId}
-            onValueChange={( val ) => setCategoryId( String( val ) )}
-            disabled={!!initialData?.id} // Cannot change category on edit
+          <Select value={watchCategoryId}
+            onValueChange={( val ) => form.setValue( "categoryId", String( val ) )}
+            disabled={!!initialData?.id}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih kategori">
-                {categoryId ? categories.find( ( c ) => c.id === categoryId )?.name : "Pilih kategori"}
+                {watchCategoryId ? categories.find( ( c ) => c.id === watchCategoryId )?.name : "Pilih kategori"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -331,14 +322,19 @@ export function FeeRuleForm( {
               ) )}
             </SelectContent>
           </Select>
+          {form.formState.errors.categoryId && (
+            <p className="text-sm text-red-500">{form.formState.errors.categoryId.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Nama Aturan Fee</Label>
-          <Input value={name}
-            onChange={( e ) => setName( e.target.value )}
+          <Input 
+            {...form.register( "name" )}
             placeholder="Contoh: Transfer Standar"
-            required
           />
+          {form.formState.errors.name && (
+            <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+          )}
         </div>
       </div>
 
@@ -348,25 +344,33 @@ export function FeeRuleForm( {
           <Button type="button"
             variant="outline"
             size="sm"
-            onClick={addTier}
+            onClick={() => {
+              const lastTier = fields[fields.length - 1] as any;
+              const newMin = lastTier ? Number( lastTier.maxAmount ) + 1 : 0;
+              append( { 
+                minAmount : newMin, 
+                maxAmount : newMin + 1000000, 
+                formulas  : { ...defaultFormulas } 
+              } );
+            }}
           >
             Tambah Rentang Nominal
           </Button>
         </div>
         
         <div className="space-y-8">
-          {tiers.map( ( tier, index ) => (
-            <div key={index}
+          {fields.map( ( field, index ) => (
+            <div key={field.id}
               className="space-y-4 p-4 border rounded-lg bg-muted/5 relative"
             >
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tier {index + 1}</span>
-                {tiers.length > 1 && (
+                {fields.length > 1 && (
                   <Button type="button"
                     variant="ghost"
                     size="sm"
                     className="text-red-500 h-6 px-2"
-                    onClick={() => removeTier( index )}
+                    onClick={() => remove( index )}
                   >
                     <X className="h-4 w-4 mr-1" /> Hapus
                   </Button>
@@ -377,50 +381,37 @@ export function FeeRuleForm( {
                 <div className="space-y-2">
                   <Label className="text-xs">Nominal Minimal</Label>
                   <Input type="number"
-                    value={tier.minAmount}
-                    onChange={( e ) => handleTierChange( index, "minAmount", Number( e.target.value ) )}
+                    {...form.register( `tiers.${index}.minAmount`, { valueAsNumber : true } )}
                     placeholder="0"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Nominal Maksimal</Label>
                   <Input type="number"
-                    value={tier.maxAmount}
-                    onChange={( e ) => handleTierChange( index, "maxAmount", Number( e.target.value ) )}
+                    {...form.register( `tiers.${index}.maxAmount`, { valueAsNumber : true } )}
                     placeholder="1000000"
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <FormulaFieldBuilder 
-                  label="Customer Fee"
-                  fieldKey="customer_fee" 
-                  value={tier.formulas.customer_fee}
-                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
-                />
-                <FormulaFieldBuilder 
-                  label="BRI Fee"
-                  fieldKey="bri_fee" 
-                  value={tier.formulas.bri_fee}
-                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
-                />
-                <FormulaFieldBuilder 
-                  label="Agent Profit"
-                  fieldKey="agent_profit" 
-                  value={tier.formulas.agent_profit}
-                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
-                />
-                <FormulaFieldBuilder 
-                  label="Total Paid"
-                  fieldKey="total_paid" 
-                  value={tier.formulas.total_paid}
-                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
-                />
+                {["customer_fee", "bri_fee", "agent_profit", "total_paid"].map( ( fKey ) => (
+                  <FormulaFieldBuilder 
+                    key={fKey}
+                    label={fKey.replace( "_", " " ).replace( /\b\w/g, l => l.toUpperCase() )}
+                    value={( field as any ).formulas[fKey]}
+                    onChange={( newVal ) => {
+                      form.setValue( `tiers.${index}.formulas.${fKey}` as any, newVal );
+                    }} 
+                  />
+                ) )}
               </div>
             </div>
           ) )}
         </div>
+        {form.formState.errors.tiers && (
+          <p className="text-sm text-red-500">{form.formState.errors.tiers.message}</p>
+        )}
       </div>
     </form>
   );

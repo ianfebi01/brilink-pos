@@ -49,6 +49,7 @@ export function TransactionForm( {
 
   const form = useForm<FormValues>( {
     resolver      : zodResolver( formSchema ),
+    mode          : "onBlur",
     defaultValues : {
       categoryId   : "",
       feeRuleId    : "",
@@ -189,6 +190,9 @@ export function TransactionForm( {
               ) )}
             </SelectContent>
           </Select>
+          {form.formState.errors.categoryId && (
+            <p className="text-sm text-red-500">{form.formState.errors.categoryId.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">

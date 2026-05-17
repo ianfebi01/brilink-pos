@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { createCategory, updateCategory } from "@/actions/categories";
+
+const formSchema = z.object( {
+  name : z.string().min( 2, "Nama kategori minimal 2 karakter" ).max( 50, "Nama kategori terlalu panjang" ),
+} );
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function CategoryForm( {
   initialData,
@@ -18,26 +27,26 @@ export function CategoryForm( {
   onLoadingChange?: ( loading: boolean ) => void;
 } ) {
   const [loading, setLoading] = useState( false );
-  const [name, setName] = useState( initialData?.name || "" );
+
+  const form = useForm<FormValues>( {
+    resolver      : zodResolver( formSchema ),
+    mode          : "onBlur",
+    defaultValues : {
+      name : initialData?.name || "",
+    },
+  } );
 
   useEffect( () => {
     onLoadingChange?.( loading );
   }, [loading, onLoadingChange] );
 
-  const handleSubmit = async ( e: React.FormEvent ) => {
-    e.preventDefault();
-    if ( !name.trim() ) {
-      toast.error( "Nama kategori wajib diisi" );
-      
-      return;
-    }
-
+  const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
     let res;
     if ( initialData?.id ) {
-      res = await updateCategory( initialData.id, { name } );
+      res = await updateCategory( initialData.id, values );
     } else {
-      res = await createCategory( { name } );
+      res = await createCategory( values );
     }
     setLoading( false );
 
@@ -51,18 +60,20 @@ export function CategoryForm( {
 
   return (
     <form id={id}
-      onSubmit={handleSubmit}
+      onSubmit={form.handleSubmit( onSubmit )}
       className="space-y-4"
     >
       <div className="space-y-2">
         <Label htmlFor="category-name">Nama Kategori</Label>
         <Input
           id="category-name"
-          value={name}
-          onChange={( e ) => setName( e.target.value )}
+          {...form.register( "name" )}
           placeholder="Contoh: Transfer Sesama BRI"
           autoFocus
         />
+        {form.formState.errors.name && (
+          <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+        )}
       </div>
     </form>
   );

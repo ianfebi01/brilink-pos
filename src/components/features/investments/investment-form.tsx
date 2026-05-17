@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,68 +11,80 @@ import { createInvestment } from "@/actions/investments";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
+const formSchema = z.object( {
+  date   : z.string().min( 1, "Tanggal wajib diisi" ),
+  amount : z.number().min( 1000, "Minimal investasi Rp 1.000" ),
+  note   : z.string().optional(),
+} );
+
+type FormValues = z.infer<typeof formSchema>;
+
 export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
   const { data: session } = useSession();
   const [loading, setLoading] = useState( false );
-  const [amount, setAmount] = useState<string>( "" );
-  const [note, setNote] = useState( "" );
-  const [date, setDate] = useState( new Date().toISOString().split( "T" )[0] );
 
-  const handleSubmit = async ( e: React.FormEvent ) => {
-    e.preventDefault();
-    if ( !amount || Number( amount ) <= 0 ) {
-      toast.error( "Valid amount is required" );
-      
-      return;
-    }
+  const form = useForm<FormValues>( {
+    resolver      : zodResolver( formSchema ),
+    mode          : "onBlur",
+    defaultValues : {
+      date   : new Date().toISOString().split( "T" )[0],
+      amount : 0,
+      note   : "",
+    },
+  } );
 
+  const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
     const res = await createInvestment( {
-      amount         : Number( amount ),
-      note,
-      investmentDate : new Date( date ),
+      amount         : values.amount,
+      note           : values.note,
+      investmentDate : new Date( values.date ),
       createdById    : ( session?.user as any )?.id,
     } );
     setLoading( false );
 
     if ( res.success ) {
-      toast.success( "Investment recorded" );
+      toast.success( "Investasi berhasil dicatat" );
       onSuccess();
     } else {
-      toast.error( res.error || "Failed to record investment" );
+      toast.error( res.error || "Gagal mencatat investasi" );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}
+    <form onSubmit={form.handleSubmit( onSubmit )}
       className="space-y-4 pt-4"
     >
       <div className="space-y-2">
         <Label>Tanggal</Label>
         <Input 
           type="date" 
-          value={date} 
-          onChange={( e ) => setDate( e.target.value )} 
-          required 
+          {...form.register( "date" )}
         />
+        {form.formState.errors.date && (
+          <p className="text-sm text-red-500">{form.formState.errors.date.message}</p>
+        )}
       </div>
       <div className="space-y-2">
         <Label>Nominal Investasi (Rp)</Label>
         <Input 
           type="number" 
-          value={amount} 
-          onChange={( e ) => setAmount( e.target.value )} 
+          {...form.register( "amount", { valueAsNumber : true } )}
           placeholder="Contoh: 1000000" 
-          required 
         />
+        {form.formState.errors.amount && (
+          <p className="text-sm text-red-500">{form.formState.errors.amount.message}</p>
+        )}
       </div>
       <div className="space-y-2">
         <Label>Catatan (Opsional)</Label>
         <Input 
-          value={note} 
-          onChange={( e ) => setNote( e.target.value )} 
+          {...form.register( "note" )}
           placeholder="Contoh: Top up saldo pagi" 
         />
+        {form.formState.errors.note && (
+          <p className="text-sm text-red-500">{form.formState.errors.note.message}</p>
+        )}
       </div>
 
       <div className="flex justify-end pt-4">
