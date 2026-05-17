@@ -20,7 +20,7 @@ export function InvestmentFormDialog( {
   trigger
 }: { 
   initialData?: any;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 } ) {
   const [open, setOpen] = useState( false );
   const [formLoading, setFormLoading] = useState( false );

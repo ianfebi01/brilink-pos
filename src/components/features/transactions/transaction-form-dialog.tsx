@@ -20,7 +20,7 @@ interface TransactionFormDialogProps {
   feeRules: any[];
   recentTransactions?: any[];
   initialData?: any;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }
 
 export function TransactionFormDialog( { 

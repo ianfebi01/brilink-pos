@@ -23,7 +23,7 @@ export function FeeRuleFormDialog( {
 }: {
   categories: any[]
   initialData?: any
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement
   existingCategoryIds?: string[]
 } ) {
   const [open, setOpen] = useState( false )

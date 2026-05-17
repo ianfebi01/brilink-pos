@@ -7,7 +7,7 @@ A premium, state-of-the-art management system for BRILink agents to track transa
 ### Prerequisites
 - **Node.js**: v18.x or higher
 - **Docker**: Required for running the PostgreSQL database
-- **npm** or **yarn**
+- **pnpm**: v9.x or higher recommended
 
 ### 1. Environment Setup
 Create a `.env` file in the root directory and configure your database connection and NextAuth secret:
@@ -27,21 +27,21 @@ docker-compose up -d
 ### 3. Initialize Database & Client
 Run these commands to sync your database with the Prisma schema and generate the client:
 ```bash
-npx prisma generate
-npx prisma db push
+pnpm prisma generate
+pnpm prisma db push
 ```
 
 ### 4. Seeding the Data
 To populate the database with categories, tiered fee rules, and sample transactions:
 ```bash
-npx prisma db seed
+pnpm prisma db seed
 ```
-*Note: If you ever change the schema significantly, use `npx prisma db push --force-reset` before seeding.*
+*Note: If you ever change the schema significantly, use `pnpm prisma db push --force-reset` before seeding.*
 
 ### 5. Running the App
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 

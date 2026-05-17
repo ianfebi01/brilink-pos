@@ -137,7 +137,7 @@ function ExpressionBuilder( { value, onChange }: { value: string, onChange: ( v:
       <div className="flex flex-wrap gap-2">
         <Select value=""
           onValueChange={( val ) => {
-            addToken( val ); 
+            if ( val ) addToken( val ); 
           }}
         >
           <SelectTrigger className="h-8 text-xs w-[140px] bg-background">
@@ -265,7 +265,7 @@ export function FeeRuleForm( {
     bri_fee      : { type : "fixed", value : 5000 },
     agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
     total_paid   : { type : "formula", expression : "amount + customer_fee" }
-  };
+  } as const;
 
   const form = useForm<FormValues>( {
     resolver      : zodResolver( formSchema ),
