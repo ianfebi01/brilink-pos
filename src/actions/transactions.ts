@@ -111,11 +111,17 @@ export async function getDashboardStats() {
   const today = new Date();
   today.setHours( 0, 0, 0, 0 );
 
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate( today.getDate() - 7 );
+  sevenDaysAgo.setHours( 0, 0, 0, 0 );
+
   const [
     todayTransactionsCount,
     todayIncomeSum,
     todayTxSum,
     todayInvestmentsSum,
+    recentTransactions,
+    dailyChartDataRaw,
   ] = await Promise.all( [
     prisma.transaction.count( {
       where : { createdAt : { gte : today } },
@@ -132,7 +138,39 @@ export async function getDashboardStats() {
       where : { investmentDate : { gte : today } },
       _sum  : { amount : true },
     } ),
+    prisma.transaction.findMany( {
+      take    : 5,
+      orderBy : { createdAt : "desc" },
+      include : { category : true },
+    } ),
+    prisma.transaction.groupBy( {
+      by    : ["createdAt"],
+      where : { createdAt : { gte : sevenDaysAgo } },
+      _sum  : { 
+        agentProfit       : true,
+        transactionAmount : true 
+      },
+    } ),
   ] );
+
+  // Process chart data to be more useful (grouped by actual date)
+  const chartDataMap = new Map();
+  dailyChartDataRaw.forEach( ( item ) => {
+    const dateStr = item.createdAt.toISOString().split( "T" )[0];
+    const existing = chartDataMap.get( dateStr ) || { totalIncome : 0, totalVolume : 0 };
+    chartDataMap.set( dateStr, {
+      totalIncome : existing.totalIncome + Number( item._sum.agentProfit || 0 ),
+      totalVolume : existing.totalVolume + Number( item._sum.transactionAmount || 0 ),
+    } );
+  } );
+
+  const chartData = Array.from( chartDataMap.entries() )
+    .map( ( [date, data] ) => ( {
+      date,
+      income : data.totalIncome,
+      volume : data.totalVolume,
+    } ) )
+    .sort( ( a, b ) => a.date.localeCompare( b.date ) );
 
   return {
     success : true,
@@ -141,6 +179,8 @@ export async function getDashboardStats() {
       totalIncome            : Number( todayIncomeSum._sum.agentProfit || 0 ),
       totalTransactionAmount : Number( todayTxSum._sum.transactionAmount || 0 ),
       totalInvestments       : Number( todayInvestmentsSum._sum.amount || 0 ),
+      recentTransactions,
+      chartData,
     },
   };
 }

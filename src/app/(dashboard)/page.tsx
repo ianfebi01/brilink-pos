@@ -2,8 +2,11 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getDashboardStats } from '@/actions/transactions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ReceiptText, TrendingUp, Activity, PiggyBank } from 'lucide-react'
+
+import { OverviewChart } from '@/components/features/dashboard/overview-chart'
+import { RecentActivity } from '@/components/features/dashboard/recent-activity'
 
 function formatIDR( amount: number ) {
   return new Intl.NumberFormat( 'id-ID', {
@@ -89,25 +92,27 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Ringkasan</CardTitle>
+            <CardTitle>Ringkasan Laba</CardTitle>
+            <CardDescription>
+              Menampilkan total laba bersih Anda selama 7 hari terakhir.
+            </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <div className="h-[300px] flex items-center justify-center border border-dashed rounded-lg text-muted-foreground">
-              [Grafik akan muncul di sini]
-            </div>
+            <OverviewChart data={data?.chartData || []} />
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Aktivitas Terkini</CardTitle>
+            <CardDescription>
+              5 transaksi terbaru yang berhasil dicatat.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-48 border border-dashed rounded-lg text-muted-foreground">
-              Menampilkan transaksi terbaru...
-            </div>
+            <RecentActivity transactions={data?.recentTransactions || []} />
           </CardContent>
         </Card>
       </div>
