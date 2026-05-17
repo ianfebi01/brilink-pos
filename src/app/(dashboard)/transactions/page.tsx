@@ -19,9 +19,9 @@ export default async function TransactionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Transaksi</h2>
           <p className="text-muted-foreground">
-            Manage your daily transactions here.
+            Kelola transaksi harian Anda di sini.
           </p>
         </div>
         <TransactionFormDialog 

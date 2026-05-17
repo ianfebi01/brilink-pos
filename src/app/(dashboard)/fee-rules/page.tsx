@@ -23,9 +23,9 @@ export default async function FeeRulesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Fee Rules</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Aturan Fee</h2>
           <p className="text-muted-foreground">
-            Configure dynamic fee calculation rules for transactions.
+            Kelola aturan fee perhitungan otomatis untuk setiap kategori transaksi.
           </p>
         </div>
         <FeeRuleFormDialog 

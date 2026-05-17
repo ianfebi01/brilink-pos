@@ -20,13 +20,13 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = ( id: string ) => {
-    if ( confirm( "Are you sure you want to delete this rule?" ) ) {
+    if ( confirm( "Apakah Anda yakin ingin menghapus aturan ini?" ) ) {
       startTransition( async () => {
         const res = await deleteFeeRule( id );
         if ( res.success ) {
-          toast.success( "Rule deleted" );
+          toast.success( "Aturan berhasil dihapus" );
         } else {
-          toast.error( res.error || "Failed to delete rule" );
+          toast.error( res.error || "Gagal menghapus aturan" );
         }
       } );
     }
@@ -37,7 +37,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
   if ( !rules.length ) {
     return (
       <div className="rounded-md border p-8 text-center text-muted-foreground">
-        No fee rules found.
+        Belum ada aturan fee.
       </div>
     );
   }
@@ -47,11 +47,11 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
-            <TableHead>Name</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Amount Range</TableHead>
-            <TableHead>Configuration Summary</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Nama</TableHead>
+            <TableHead>Kategori</TableHead>
+            <TableHead>Rentang Nominal</TableHead>
+            <TableHead>Ringkasan Konfigurasi</TableHead>
+            <TableHead className="text-right">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -101,7 +101,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                         } )}
                       </div>
                     ) )}
-                    {tierCount > 2 && <span className="text-[10px] italic text-muted-foreground">...and {tierCount - 2} more tiers</span>}
+                    {tierCount > 2 && <span className="text-[10px] italic text-muted-foreground">...dan {tierCount - 2} tingkatan lainnya</span>}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
@@ -116,7 +116,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                           size="icon" 
                           className="text-amber-500 hover:text-amber-700 hover:bg-amber-50"
                           disabled={isPending}
-                          title="Edit Rule"
+                          title="Edit Aturan"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -128,7 +128,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                       initialData={{
                         ...rule,
                         id         : undefined,
-                        name       : `${rule.name} (Copy)`,
+                        name       : `${rule.name} (Salin)`,
                         categoryId : "", 
                       }}
                       trigger={
@@ -137,7 +137,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                           size="icon" 
                           className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
                           disabled={isPending}
-                          title="Duplicate Rule"
+                          title="Duplikat Aturan"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>

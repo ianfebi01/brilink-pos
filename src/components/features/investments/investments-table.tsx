@@ -25,7 +25,7 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
   if ( !investments.length ) {
     return (
       <div className="rounded-md border p-8 text-center text-muted-foreground">
-        No investments found.
+        Tidak ada data investasi ditemukan.
       </div>
     );
   }

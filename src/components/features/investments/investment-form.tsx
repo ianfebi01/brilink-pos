@@ -45,7 +45,7 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
       className="space-y-4 pt-4"
     >
       <div className="space-y-2">
-        <Label>Date</Label>
+        <Label>Tanggal</Label>
         <Input 
           type="date" 
           value={date} 
@@ -54,21 +54,21 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
         />
       </div>
       <div className="space-y-2">
-        <Label>Amount (Rp)</Label>
+        <Label>Nominal Investasi (Rp)</Label>
         <Input 
           type="number" 
           value={amount} 
           onChange={( e ) => setAmount( e.target.value )} 
-          placeholder="1000000" 
+          placeholder="Contoh: 1000000" 
           required 
         />
       </div>
       <div className="space-y-2">
-        <Label>Note (Optional)</Label>
+        <Label>Catatan (Opsional)</Label>
         <Input 
           value={note} 
           onChange={( e ) => setNote( e.target.value )} 
-          placeholder="Top up saldo pagi" 
+          placeholder="Contoh: Top up saldo pagi" 
         />
       </div>
 
@@ -76,7 +76,7 @@ export function InvestmentForm( { onSuccess }: { onSuccess: () => void } ) {
         <Button type="submit"
           disabled={loading}
         >
-          {loading ? "Saving..." : "Save Investment"}
+          {loading ? "Menyimpan..." : "Simpan Investasi"}
         </Button>
       </div>
     </form>

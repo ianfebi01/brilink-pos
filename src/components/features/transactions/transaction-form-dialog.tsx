@@ -29,15 +29,15 @@ export function TransactionFormDialog( { categories, feeRules }: TransactionForm
         render={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Transaction
+            Transaksi Baru
           </Button>
         }
       />
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create Transaction</DialogTitle>
+          <DialogTitle>Buat Transaksi</DialogTitle>
           <DialogDescription>
-            Enter transaction details. Fees will be calculated automatically based on the selected fee rule.
+            Masukkan rincian transaksi. Biaya fee akan dihitung secara otomatis berdasarkan aturan yang berlaku.
           </DialogDescription>
         </DialogHeader>
         <TransactionForm 

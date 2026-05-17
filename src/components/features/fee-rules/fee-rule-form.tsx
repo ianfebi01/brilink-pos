@@ -163,20 +163,20 @@ function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuild
         >
           <SelectTrigger className="h-8 text-xs">
             <SelectValue>
-              {type === "percentage" ? "Percentage" : type === "formula" ? "Formula" : "Fixed"}
+              {type === "percentage" ? "Persentase" : type === "formula" ? "Rumus" : "Tetap"}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fixed">Fixed</SelectItem>
-            <SelectItem value="percentage">Percentage</SelectItem>
-            <SelectItem value="formula">Formula</SelectItem>
+            <SelectItem value="fixed">Tetap</SelectItem>
+            <SelectItem value="percentage">Persentase</SelectItem>
+            <SelectItem value="formula">Rumus</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="col-span-9">
         {type === "formula" ? (
           <div className="w-full">
-            <Label className="text-xs mb-1 block text-muted-foreground">Expression Builder</Label>
+            <Label className="text-xs mb-1 block text-muted-foreground">Pembuat Ekspresi</Label>
             <ExpressionBuilder 
               value={expr} 
               onChange={( newExpr ) => onChange( fieldKey, { ...value, expression : newExpr } )} 
@@ -269,7 +269,7 @@ export function FeeRuleForm( {
   const handleSubmit = async ( e: React.FormEvent ) => {
     e.preventDefault();
     if ( !categoryId || !name ) {
-      toast.error( "Category and name are required" );
+      toast.error( "Kategori dan nama wajib diisi" );
       
       return;
     }
@@ -290,10 +290,10 @@ export function FeeRuleForm( {
     setLoading( false );
 
     if ( res.success ) {
-      toast.success( initialData?.id ? "Rule updated" : "Rule created" );
+      toast.success( initialData?.id ? "Aturan berhasil diperbarui" : "Aturan berhasil dibuat" );
       onSuccess();
     } else {
-      toast.error( res.error || "Failed to save rule" );
+      toast.error( res.error || "Gagal menyimpan aturan" );
     }
   };
 
@@ -309,8 +309,8 @@ export function FeeRuleForm( {
             disabled={!!initialData?.id} // Cannot change category on edit
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select category">
-                {categoryId ? categories.find( ( c ) => c.id === categoryId )?.name : "Select category"}
+              <SelectValue placeholder="Pilih kategori">
+                {categoryId ? categories.find( ( c ) => c.id === categoryId )?.name : "Pilih kategori"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -323,10 +323,10 @@ export function FeeRuleForm( {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Rule Name</Label>
+          <Label>Nama Aturan Fee</Label>
           <Input value={name}
             onChange={( e ) => setName( e.target.value )}
-            placeholder="Standard Transfer"
+            placeholder="Contoh: Transfer Standar"
             required
           />
         </div>
@@ -334,13 +334,13 @@ export function FeeRuleForm( {
 
       <div className="space-y-4 pt-4 border-t">
         <div className="flex justify-between items-center">
-          <h4 className="font-semibold text-sm">Tier Configuration</h4>
+          <h4 className="font-semibold text-sm">Konfigurasi Tingkatan (Tier)</h4>
           <Button type="button"
             variant="outline"
             size="sm"
             onClick={addTier}
           >
-            Add Amount Tier
+            Tambah Rentang Nominal
           </Button>
         </div>
         
@@ -358,14 +358,14 @@ export function FeeRuleForm( {
                     className="text-red-500 h-6 px-2"
                     onClick={() => removeTier( index )}
                   >
-                    <X className="h-4 w-4 mr-1" /> Remove
+                    <X className="h-4 w-4 mr-1" /> Hapus
                   </Button>
                 )}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs">Min Amount</Label>
+                  <Label className="text-xs">Nominal Minimal</Label>
                   <Input type="number"
                     value={tier.minAmount}
                     onChange={( e ) => handleTierChange( index, "minAmount", Number( e.target.value ) )}
@@ -373,7 +373,7 @@ export function FeeRuleForm( {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Max Amount</Label>
+                  <Label className="text-xs">Nominal Maksimal</Label>
                   <Input type="number"
                     value={tier.maxAmount}
                     onChange={( e ) => handleTierChange( index, "maxAmount", Number( e.target.value ) )}
@@ -418,7 +418,7 @@ export function FeeRuleForm( {
           disabled={loading}
           className="w-full sm:w-auto"
         >
-          {loading ? "Saving..." : initialData?.id ? "Update Rule" : "Save Rule"}
+          {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Aturan" : "Simpan Aturan"}
         </Button>
       </div>
     </form>

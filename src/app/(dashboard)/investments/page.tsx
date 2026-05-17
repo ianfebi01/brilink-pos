@@ -26,9 +26,9 @@ export default async function InvestmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Daily Investments</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Investasi Harian</h2>
           <p className="text-muted-foreground">
-            Track capital additions to your BRILink agent balance.
+            Pantau penambahan modal saldo BRILink Anda.
           </p>
         </div>
         <InvestmentFormDialog />

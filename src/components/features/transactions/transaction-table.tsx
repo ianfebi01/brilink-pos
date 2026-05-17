@@ -26,7 +26,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
   if ( !transactions.length ) {
     return (
       <div className="rounded-md border p-8 text-center text-muted-foreground">
-        No transactions found.
+        Tidak ada transaksi ditemukan.
       </div>
     );
   }
@@ -46,21 +46,21 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
-            <TableHead className="w-[180px]">Date</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead className="text-right">Customer Fee</TableHead>
-            <TableHead className="text-right">Agent Profit</TableHead>
-            <TableHead className="text-right">Total Paid</TableHead>
+            <TableHead className="w-[180px]">Tanggal</TableHead>
+            <TableHead>Kategori</TableHead>
+            <TableHead className="text-right">Nominal</TableHead>
+            <TableHead className="text-right">Fee Pelanggan</TableHead>
+            <TableHead className="text-right">Laba Agen</TableHead>
+            <TableHead className="text-right">Total Bayar</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedDates.map( ( date ) => {
             const dateObj = new Date( date );
             const dateLabel = isToday( dateObj ) 
-              ? "Today" 
+              ? "Hari Ini" 
               : isYesterday( dateObj ) 
-                ? "Yesterday" 
+                ? "Kemarin" 
                 : format( dateObj, "EEE, dd MMM" );
             
             const dayTransactions = groups[date];

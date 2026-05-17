@@ -24,15 +24,15 @@ export function InvestmentFormDialog() {
         render={
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Investment
+            Tambah Investasi
           </Button>
         }
       />
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Daily Investment</DialogTitle>
+          <DialogTitle>Tambah Investasi Harian</DialogTitle>
           <DialogDescription>
-            Record new capital added to the BRILink balance.
+            Catat penambahan modal baru ke saldo BRILink Anda.
           </DialogDescription>
         </DialogHeader>
         <InvestmentForm onSuccess={() => setOpen( false )} />

@@ -35,17 +35,17 @@ export function FeeRuleFormDialog( {
         {trigger || (
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Rule
+            Aturan Baru
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Fee Rule' : 'Create Fee Rule'}
+            {isEditing ? 'Perbarui Aturan Fee' : 'Buat Aturan Fee'}
           </DialogTitle>
           <DialogDescription>
-            Configure dynamic fee calculation rules visually.
+            Konfigurasi aturan perhitungan fee transaksi secara visual.
           </DialogDescription>
         </DialogHeader>
         <FeeRuleForm

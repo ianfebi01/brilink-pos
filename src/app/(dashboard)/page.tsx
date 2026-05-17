@@ -25,9 +25,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Beranda</h2>
         <p className="text-muted-foreground">
-          Welcome back, {session.user?.name}. Here is your overview for today.
+          Selamat datang kembali, {session.user?.name}. Berikut adalah ringkasan Anda hari ini.
         </p>
       </div>
 
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Transactions Today
+              Total Transaksi Hari Ini
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Income Today
+              Total Laba Hari Ini
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Transaction Vol
+              Volume Transaksi
             </CardTitle>
             <ReceiptText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Investments
+              Total Investasi
             </CardTitle>
             <PiggyBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -92,21 +92,21 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+            <CardTitle>Ringkasan</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] flex items-center justify-center border border-dashed rounded-lg text-muted-foreground">
-              [Chart goes here: implement with Recharts in MVP refinement]
+              [Grafik akan muncul di sini]
             </div>
           </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Aktivitas Terkini</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center h-48 border border-dashed rounded-lg text-muted-foreground">
-              Recent transactions stream...
+              Menampilkan transaksi terbaru...
             </div>
           </CardContent>
         </Card>

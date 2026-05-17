@@ -12,11 +12,20 @@ import { calculateTransaction } from "@/features/formulas/engine";
 import { createTransaction } from "@/actions/transactions";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { LayoutDashboard } from "lucide-react";
+
+function formatIDR( amount: number ) {
+  return new Intl.NumberFormat( "id-ID", {
+    style                 : "currency",
+    currency              : "IDR",
+    minimumFractionDigits : 0,
+  } ).format( amount );
+}
 
 const formSchema = z.object( {
-  categoryId   : z.string().min( 1, "Category is required" ),
+  categoryId   : z.string().min( 1, "Kategori wajib diisi" ),
   feeRuleId    : z.string().optional(),
-  amount       : z.number().min( 1, "Amount must be greater than 0" ),
+  amount       : z.number().min( 1, "Nominal harus lebih besar dari 0" ),
   customerName : z.string().optional(),
   note         : z.string().optional(),
 } );
@@ -90,7 +99,7 @@ export function TransactionForm( {
 
   const onSubmit = async ( values: FormValues ) => {
     if ( !calcResult || calcResult.error ) {
-      toast.error( "Please ensure fee is calculated properly" );
+      toast.error( "Pastikan biaya fee telah dihitung dengan benar" );
       
       return;
     }
@@ -111,11 +120,11 @@ export function TransactionForm( {
 
     setLoading( false );
     if ( res.success ) {
-      toast.success( "Transaction created" );
+      toast.success( "Transaksi berhasil dibuat" );
       form.reset();
       onSuccess();
     } else {
-      toast.error( res.error || "Failed to create transaction" );
+      toast.error( res.error || "Gagal membuat transaksi" );
     }
   };
 
@@ -127,7 +136,7 @@ export function TransactionForm( {
     >
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Category</Label>
+          <Label>Kategori</Label>
           <Select value={watchCategoryId}
             onValueChange={( val ) => {
               form.setValue( "categoryId", String( val ) );
@@ -135,8 +144,8 @@ export function TransactionForm( {
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select category">
-                {watchCategoryId ? categories.find( ( c ) => c.id === watchCategoryId )?.name : "Select category"}
+              <SelectValue placeholder="Pilih kategori">
+                {watchCategoryId ? categories.find( ( c ) => c.id === watchCategoryId )?.name : "Pilih kategori"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -150,10 +159,10 @@ export function TransactionForm( {
         </div>
 
         <div className="space-y-2">
-          <Label>Transaction Amount (Rp)</Label>
+          <Label>Nominal Transaksi (Rp)</Label>
           <Input type="number"
             {...form.register( "amount", { valueAsNumber : true } )}
-            placeholder="100000"
+            placeholder="Contoh: 100000"
           />
           {form.formState.errors.amount && (
             <p className="text-sm text-red-500">{form.formState.errors.amount.message}</p>
@@ -162,32 +171,32 @@ export function TransactionForm( {
       </div>
 
       {calcResult && !calcResult.error && (
-        <div className="rounded-md bg-muted p-4 space-y-2 text-sm border">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="font-semibold">Calculation Breakdown</h4>
-            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs">
-              Rule: {calcResult.appliedRule}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Amount:</span>
-            <span>Rp {calcResult.amount.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Customer Fee:</span>
-            <span>Rp {calcResult.customer_fee.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">BRI Fee (internal):</span>
-            <span>Rp {calcResult.bri_fee.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between font-medium text-green-600">
-            <span>Agent Profit:</span>
-            <span>Rp {calcResult.agent_profit.toLocaleString()}</span>
-          </div>
-          <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
-            <span>Total to Pay:</span>
-            <span>Rp {calcResult.total_paid.toLocaleString()}</span>
+        <div className="bg-muted/30 p-4 rounded-lg border border-primary/10 space-y-3">
+          <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            Rincian Perhitungan
+          </h4>
+          <div className="space-y-1.5 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Nominal:</span>
+              <span className="font-medium text-foreground">{formatIDR( watchAmount )}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Fee Pelanggan:</span>
+              <span className="font-medium text-blue-600">+{formatIDR( calcResult.customer_fee )}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground border-t pt-1.5 mt-1.5">
+              <span>Fee BRI (internal):</span>
+              <span className="font-medium text-red-600">-{formatIDR( calcResult.bri_fee )}</span>
+            </div>
+            <div className="flex justify-between text-primary font-bold text-base border-t border-primary/20 pt-1.5 mt-1.5">
+              <span>Laba Agen:</span>
+              <span>{formatIDR( calcResult.agent_profit )}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground text-xs pt-1 mt-2 border-t border-dashed">
+              <span>Total yang Harus Dibayar:</span>
+              <span className="font-semibold">{formatIDR( calcResult.total_paid )}</span>
+            </div>
           </div>
         </div>
       )}
@@ -199,16 +208,16 @@ export function TransactionForm( {
       )}
 
       <div className="space-y-2">
-        <Label>Customer Name (Optional)</Label>
+        <Label>Nama Pelanggan (Opsional)</Label>
         <Input {...form.register( "customerName" )}
-          placeholder="Budi"
+          placeholder="Contoh: Budi"
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Note (Optional)</Label>
+        <Label>Catatan (Opsional)</Label>
         <Input {...form.register( "note" )}
-          placeholder="Transfer ke BCA"
+          placeholder="Contoh: Transfer ke BCA"
         />
       </div>
 
@@ -217,12 +226,12 @@ export function TransactionForm( {
           type="button"
           onClick={onSuccess}
         >
-          Cancel
+          Batal
         </Button>
         <Button type="submit"
           disabled={loading || !calcResult || calcResult.error}
         >
-          {loading ? "Saving..." : "Save Transaction"}
+          {loading ? "Menyimpan..." : "Simpan Transaksi"}
         </Button>
       </div>
     </form>

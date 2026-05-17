@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { name : "Dashboard", href : "/", icon : LayoutDashboard },
-  { name : "Transactions", href : "/transactions", icon : ReceiptText },
-  { name : "Fee Rules", href : "/fee-rules", icon : Settings },
-  { name : "Investments", href : "/investments", icon : PiggyBank },
+  { name : "Transaksi", href : "/transactions", icon : ReceiptText },
+  { name : "Aturan Fee", href : "/fee-rules", icon : Settings },
+  { name : "Investasi", href : "/investments", icon : PiggyBank },
 ];
 
 export function Sidebar() {
@@ -44,7 +44,7 @@ export function Sidebar() {
           onClick={() => signOut( { callbackUrl : "/login" } )}
         >
           <LogOut className="h-4 w-4" />
-          Logout
+          Keluar
         </Button>
       </div>
     </div>
