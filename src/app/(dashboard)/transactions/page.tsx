@@ -14,7 +14,6 @@ export default async function TransactionsPage() {
   if ( !catRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading categories: {catRes.error}</div>;
   if ( !ruleRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading fee rules: {ruleRes.error}</div>;
 
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,7 +26,7 @@ export default async function TransactionsPage() {
         <TransactionFormDialog 
           categories={catRes.categories || []} 
           feeRules={ruleRes.rules || []} 
-          recentTransactions={(txRes.transactions || []).slice(0, 5)}
+          recentTransactions={( txRes.transactions || [] ).slice( 0, 5 )}
         />
       </div>
       <TransactionTable transactions={txRes.transactions || []} />

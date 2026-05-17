@@ -4,6 +4,11 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import * as z from "zod";
+
+const categorySchema = z.object( {
+  name : z.string().min( 2 ).max( 50 ),
+} );
 
 async function checkSuperAdmin() {
   const session = await getServerSession( authOptions );
@@ -27,6 +32,7 @@ export async function getCategories() {
 export async function createCategory( data: { name: string } ) {
   try {
     await checkSuperAdmin();
+    categorySchema.parse( data );
     
     // Generate a simple code/slug from name
     const code = data.name.toLowerCase().replace( /[^a-z0-9]+/g, "-" ).replace( /^-+|-+$/g, "" ) || `cat-${Date.now()}`;
@@ -50,6 +56,8 @@ export async function createCategory( data: { name: string } ) {
 export async function updateCategory( id: string, data: { name: string } ) {
   try {
     await checkSuperAdmin();
+    categorySchema.parse( data );
+
     const category = await prisma.transactionCategory.update( {
       where : { id },
       data,

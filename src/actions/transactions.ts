@@ -4,6 +4,20 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import * as z from "zod";
+
+const transactionSchema = z.object( {
+  categoryId        : z.string().min( 1 ),
+  feeRuleId         : z.string().optional(),
+  transactionAmount : z.number().positive(),
+  customerFee       : z.number().nonnegative(),
+  briFee            : z.number().nonnegative(),
+  agentProfit       : z.number(),
+  totalPaid         : z.number().positive(),
+  customerName      : z.string().optional(),
+  note              : z.string().optional(),
+  createdById       : z.string().min( 1 ),
+} );
 
 export async function createTransaction( data: {
   categoryId: string;
@@ -18,6 +32,7 @@ export async function createTransaction( data: {
   createdById: string;
 } ) {
   try {
+    transactionSchema.parse( data );
     const transaction = await prisma.transaction.create( {
       data,
     } );

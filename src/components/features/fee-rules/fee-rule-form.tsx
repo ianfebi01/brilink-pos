@@ -48,6 +48,29 @@ const formSchema = z.object( {
   categoryId : z.string().min( 1, "Kategori wajib diisi" ),
   name       : z.string().min( 2, "Nama minimal 2 karakter" ),
   tiers      : z.array( tierSchema ).min( 1, "Minimal satu tingkatan (tier) harus ada" ),
+} ).superRefine( ( data, ctx ) => {
+  data.tiers.forEach( ( tier, index ) => {
+    // 1. Check if max > min for individual tier
+    if ( tier.maxAmount <= tier.minAmount ) {
+      ctx.addIssue( {
+        code    : z.ZodIssueCode.custom,
+        message : `Nominal maksimal harus lebih besar dari minimal (Tier ${index + 1})`,
+        path    : ["tiers", index, "maxAmount"],
+      } );
+    }
+
+    // 2. Check for overlaps with previous tier
+    if ( index > 0 ) {
+      const prevTier = data.tiers[index - 1];
+      if ( tier.minAmount <= prevTier.maxAmount ) {
+        ctx.addIssue( {
+          code    : z.ZodIssueCode.custom,
+          message : `Nominal minimal harus lebih besar dari maksimal Tier ${index} agar tidak tumpang tindih`,
+          path    : ["tiers", index, "minAmount"],
+        } );
+      }
+    }
+  } );
 } );
 
 type FormValues = z.infer<typeof formSchema>;
@@ -384,6 +407,9 @@ export function FeeRuleForm( {
                     {...form.register( `tiers.${index}.minAmount`, { valueAsNumber : true } )}
                     placeholder="0"
                   />
+                  {form.formState.errors.tiers?.[index]?.minAmount && (
+                    <p className="text-[10px] text-red-500">{form.formState.errors.tiers[index].minAmount?.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Nominal Maksimal</Label>
@@ -391,6 +417,9 @@ export function FeeRuleForm( {
                     {...form.register( `tiers.${index}.maxAmount`, { valueAsNumber : true } )}
                     placeholder="1000000"
                   />
+                  {form.formState.errors.tiers?.[index]?.maxAmount && (
+                    <p className="text-[10px] text-red-500">{form.formState.errors.tiers[index].maxAmount?.message}</p>
+                  )}
                 </div>
               </div>
 

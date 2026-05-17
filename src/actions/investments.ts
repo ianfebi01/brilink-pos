@@ -4,6 +4,14 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import * as z from "zod";
+
+const investmentSchema = z.object( {
+  amount         : z.number().positive(),
+  note           : z.string().optional(),
+  investmentDate : z.coerce.date(),
+  createdById    : z.string().min( 1 ),
+} );
 
 async function checkSuperAdmin() {
   const session = await getServerSession( authOptions );
@@ -39,6 +47,7 @@ export async function createInvestment( data: {
 } ) {
   try {
     await checkSuperAdmin();
+    investmentSchema.parse( data );
     const investment = await prisma.dailyInvestment.create( {
       data,
     } );

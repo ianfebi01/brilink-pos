@@ -4,6 +4,30 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import * as z from "zod";
+
+const formulaSchema = z.object( {
+  type       : z.enum( ["fixed", "percentage", "formula"] ),
+  value      : z.number().optional(),
+  expression : z.string().optional(),
+} );
+
+const tierSchema = z.object( {
+  minAmount : z.number().min( 0 ),
+  maxAmount : z.number().min( 1 ),
+  formulas  : z.object( {
+    customer_fee : formulaSchema,
+    bri_fee      : formulaSchema,
+    agent_profit : formulaSchema,
+    total_paid   : formulaSchema,
+  } ),
+} );
+
+const feeRuleSchema = z.object( {
+  categoryId : z.string().min( 1 ),
+  name       : z.string().min( 2 ),
+  formulaJson : z.array( tierSchema ).min( 1 ),
+} );
 
 async function checkSuperAdmin() {
   const session = await getServerSession( authOptions );
@@ -52,6 +76,8 @@ export async function createFeeRule( data: {
 } ) {
   try {
     await checkSuperAdmin();
+    feeRuleSchema.parse( data );
+
     // 1. Check for category uniqueness
     const existing = await prisma.feeRule.findUnique( {
       where : { categoryId : data.categoryId },
@@ -133,6 +159,8 @@ export async function updateFeeRule( id: string, data: {
 } ) {
   try {
     await checkSuperAdmin();
+    feeRuleSchema.parse( data );
+
     // Validate tiers
     validateTiers( data.formulaJson );
 
