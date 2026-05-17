@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -202,14 +202,23 @@ export function FeeRuleForm( {
   categories, 
   onSuccess, 
   initialData,
-  existingCategoryIds = []
+  existingCategoryIds = [],
+  id,
+  onLoadingChange
 }: { 
   categories: any[], 
   onSuccess: () => void, 
   initialData?: any,
-  existingCategoryIds?: string[]
+  existingCategoryIds?: string[],
+  id?: string,
+  onLoadingChange?: ( loading: boolean ) => void
 } ) {
   const [loading, setLoading] = useState( false );
+
+  useEffect( () => {
+    onLoadingChange?.( loading );
+  }, [loading, onLoadingChange] );
+
   const [categoryId, setCategoryId] = useState( initialData?.categoryId || "" );
   const [name, setName] = useState( initialData?.name || "" );
 
@@ -298,7 +307,8 @@ export function FeeRuleForm( {
   };
 
   return (
-    <form onSubmit={handleSubmit}
+    <form id={id}
+      onSubmit={handleSubmit}
       className="space-y-6"
     >
       <div className="grid grid-cols-2 gap-4">
@@ -411,15 +421,6 @@ export function FeeRuleForm( {
             </div>
           ) )}
         </div>
-      </div>
-
-      <div className="flex justify-end pt-4 border-t">
-        <Button type="submit"
-          disabled={loading}
-          className="w-full sm:w-auto"
-        >
-          {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Aturan" : "Simpan Aturan"}
-        </Button>
       </div>
     </form>
   );

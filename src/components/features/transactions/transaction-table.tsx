@@ -89,25 +89,29 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
                 </TableRow>
                 {dayTransactions.map( ( tx: any, index: number ) => (
                   <TableRow key={tx.id}
-                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
+                    className={cn( "hover:bg-primary/5 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/30" )}
                   >
-                    <TableCell className="text-muted-foreground text-xs">
+                    <TableCell className="text-muted-foreground text-[10px] font-medium">
                       {format( new Date( tx.createdAt ), "HH:mm" )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-primary/40" />
-                        <span className="font-medium">{tx.category?.name}</span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{tx.category?.name}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold">
+                          TX ID: {tx.id.slice( -6 )}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-semibold text-foreground/90">
                       {formatIDR( Number( tx.transactionAmount ) )}
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
+                    <TableCell className="text-right text-muted-foreground text-xs">
                       {formatIDR( Number( tx.customerFee ) )}
                     </TableCell>
-                    <TableCell className="text-right text-green-600 font-medium">
-                      +{formatIDR( Number( tx.agentProfit ) )}
+                    <TableCell className="text-right">
+                      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        +{formatIDR( Number( tx.agentProfit ) )}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right font-bold text-primary">
                       {formatIDR( Number( tx.totalPaid ) )}

@@ -45,19 +45,19 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
-            <TableHead>Date</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead>Note</TableHead>
-            <TableHead className="text-right">Created By</TableHead>
+            <TableHead>Waktu</TableHead>
+            <TableHead className="text-right">Nominal</TableHead>
+            <TableHead>Catatan</TableHead>
+            <TableHead className="text-right">Oleh</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedDates.map( ( date ) => {
             const dateObj = new Date( date );
             const dateLabel = isToday( dateObj ) 
-              ? "Today" 
+              ? "Hari Ini" 
               : isYesterday( dateObj ) 
-                ? "Yesterday" 
+                ? "Kemarin" 
                 : format( dateObj, "EEE, dd MMM" );
             
             const dayInvestments = groups[date];
@@ -76,25 +76,33 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
                     <Badge variant="secondary"
                       className="rounded-md font-normal bg-muted-foreground/10"
                     >
-                      {dayInvestments.length} Records
+                      {dayInvestments.length} Catatan
                     </Badge>
                   </TableCell>
                 </TableRow>
                 {dayInvestments.map( ( inv: any, index: number ) => (
                   <TableRow key={inv.id}
-                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
+                    className={cn( "hover:bg-primary/5 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/30" )}
                   >
-                    <TableCell className="text-muted-foreground text-xs">
+                    <TableCell className="text-muted-foreground text-[10px] font-medium">
                       {format( new Date( inv.investmentDate ), "HH:mm" )}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-blue-600">
-                      {formatIDR( Number( inv.amount ) )}
+                    <TableCell className="text-right font-bold text-blue-600">
+                      <div className="flex flex-col items-end">
+                        <span>{formatIDR( Number( inv.amount ) )}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold">
+                          INV ID: {inv.id.slice( -6 )}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate italic text-muted-foreground">
+                    <TableCell className="max-w-[200px] truncate italic text-muted-foreground text-xs">
                       {inv.note || "-"}
                     </TableCell>
-                    <TableCell className="text-right text-xs text-muted-foreground">
-                      {inv.createdBy?.name || "System"}
+                    <TableCell className="text-right">
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs font-medium">{inv.createdBy?.name || "System"}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase">Admin</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) )}

@@ -6,7 +6,7 @@ export const ROLES = {
 export type Role = typeof ROLES[keyof typeof ROLES];
 
 export const ROUTE_PERMISSIONS = {
-  [ROLES.SUPERADMIN] : ["/", "/transactions", "/fee-rules", "/investments"],
+  [ROLES.SUPERADMIN] : ["/", "/transactions", "/fee-rules", "/investments", "/categories"],
   [ROLES.ADMIN]      : ["/transactions"], // Cannot access dashboard (/), fee-rules, or investments
 } as const;
 

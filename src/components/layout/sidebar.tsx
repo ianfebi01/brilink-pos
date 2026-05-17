@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ReceiptText, Settings, PiggyBank, LogOut } from "lucide-react";
+import { LayoutDashboard, ReceiptText, Settings, PiggyBank, List, LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { ROLES, ROUTE_PERMISSIONS } from "@/lib/rbac";
 import { Button } from "../ui/button";
@@ -9,6 +9,7 @@ const navItems = [
   { name : "Dashboard", href : "/", icon : LayoutDashboard },
   { name : "Transaksi", href : "/transactions", icon : ReceiptText },
   { name : "Aturan Fee", href : "/fee-rules", icon : Settings },
+  { name : "Kategori", href : "/categories", icon : List },
   { name : "Investasi", href : "/investments", icon : PiggyBank },
 ];
 
