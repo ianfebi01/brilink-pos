@@ -15,9 +15,9 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r bg-card text-card-foreground">
+    <div className="flex h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center border-b px-4">
-        <h1 className="text-lg font-bold text-primary">BRILink Admin</h1>
+        <h1 className="text-lg font-bold text-sidebar-foreground">BRILink Admin</h1>
       </div>
       <nav className="flex-1 space-y-1 p-2">
         {navItems.map( ( item ) => {
@@ -28,7 +28,7 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted hover:text-foreground text-muted-foreground"
+                isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground/70"
               }`}
             >
               <item.icon className="h-4 w-4" />
@@ -40,8 +40,8 @@ export function Sidebar() {
       <div className="border-t p-4">
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-          onClick={() => signOut()}
+          className="w-full justify-start gap-3 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          onClick={() => signOut( { callbackUrl : "/login" } )}
         >
           <LogOut className="h-4 w-4" />
           Logout

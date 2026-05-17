@@ -22,6 +22,18 @@ async function main() {
   } )
   console.log( `Created admin user: ${admin.username}` )
 
+  const staff = await prisma.user.upsert( {
+    where  : { username : 'staff' },
+    update : {},
+    create : {
+      username : 'staff',
+      password : hashPassword( 'staff123' ),
+      name     : 'Regular Staff',
+      role     : 'admin',
+    },
+  } )
+  console.log( `Created staff user: ${staff.username}` )
+
   // 2. Create Categories
   const catTransfer = await prisma.transactionCategory.upsert( {
     where  : { code : 'TRF_BRI' },
