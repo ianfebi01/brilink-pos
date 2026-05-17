@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -10,26 +10,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { FeeRuleForm } from "./fee-rule-form";
+} from '@/components/ui/dialog'
+import { FeeRuleForm } from './fee-rule-form'
 
-export function FeeRuleFormDialog( { 
-  categories, 
-  initialData, 
-  trigger 
-}: { 
-  categories: any[]; 
-  initialData?: any;
-  trigger?: React.ReactNode;
+export function FeeRuleFormDialog( {
+  categories,
+  initialData,
+  trigger,
+}: {
+  categories: any[]
+  initialData?: any
+  trigger?: React.ReactNode
 } ) {
-  const [open, setOpen] = useState( false );
-  const isEditing = !!initialData?.id;
+  const [open, setOpen] = useState( false )
+  const isEditing = !!initialData?.id
 
   return (
     <Dialog open={open}
       onOpenChange={setOpen}
     >
-      <DialogTrigger 
+      <DialogTrigger
         render={
           trigger || (
             <Button>
@@ -41,17 +41,19 @@ export function FeeRuleFormDialog( {
       />
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Fee Rule" : "Create Fee Rule"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit Fee Rule' : 'Create Fee Rule'}
+          </DialogTitle>
           <DialogDescription>
             Configure dynamic fee calculation rules visually.
           </DialogDescription>
         </DialogHeader>
-        <FeeRuleForm 
-          categories={categories} 
+        <FeeRuleForm
+          categories={categories}
           initialData={initialData}
-          onSuccess={() => setOpen( false )} 
+          onSuccess={() => setOpen( false )}
         />
       </DialogContent>
     </Dialog>
-  );
+  )
 }
