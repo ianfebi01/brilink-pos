@@ -15,11 +15,17 @@ import {
 } from "@/components/ui/dialog";
 import { InvestmentForm } from "./investment-form";
 
-export function InvestmentFormDialog() {
+export function InvestmentFormDialog( { 
+  initialData,
+  trigger
+}: { 
+  initialData?: any;
+  trigger?: React.ReactNode;
+} ) {
   const [open, setOpen] = useState( false );
   const [formLoading, setFormLoading] = useState( false );
   const [formValid, setFormValid] = useState( false );
-  const formId = "investment-form";
+  const formId = `investment-form-${initialData?.id || "new"}`;
 
   return (
     <Dialog open={open}
@@ -27,22 +33,25 @@ export function InvestmentFormDialog() {
     >
       <DialogTrigger
         render={
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah Investasi
-          </Button>
+          trigger || (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Investasi
+            </Button>
+          )
         }
       />
       <DialogContent className="w-full max-w-full h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[calc(100vh-4rem)] p-4 sm:p-6 rounded-none sm:rounded-xl overflow-y-auto sm:max-w-[500px] flex flex-col">
         <DialogHeader className="-mx-4 -mt-4 mb-4 px-4 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-6 border-b bg-muted/30 shrink-0">
-          <DialogTitle>Tambah Investasi Harian</DialogTitle>
+          <DialogTitle>{initialData ? "Edit Investasi" : "Tambah Investasi Harian"}</DialogTitle>
           <DialogDescription>
-            Catat penambahan modal baru ke saldo BRILink Anda.
+            {initialData ? "Ubah data catatan investasi saldo BRILink Anda." : "Catat penambahan modal baru ke saldo BRILink Anda."}
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 no-scrollbar overflow-y-auto px-4 grow flex flex-col">
           <InvestmentForm 
             id={formId}
+            initialData={initialData}
             onSuccess={() => setOpen( false )} 
             onLoadingChange={setFormLoading}
             onValidityChange={setFormValid}
@@ -55,7 +64,7 @@ export function InvestmentFormDialog() {
             type="submit" 
             disabled={formLoading || !formValid}
           >
-            {formLoading ? "Menyimpan..." : "Simpan Investasi"}
+            {formLoading ? "Menyimpan..." : ( initialData ? "Simpan Perubahan" : "Simpan Investasi" )}
           </Button>
         </DialogFooter>
       </DialogContent>

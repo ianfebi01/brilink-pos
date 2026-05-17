@@ -27,20 +27,40 @@ function formatIDR( amount: number ) {
 }
 
 import { DateRangeFilter } from "./date-range-filter";
+import { Edit2, Trash2 } from "lucide-react";
+import { deleteTransaction } from "@/actions/transactions";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { TransactionFormDialog } from "./transaction-form-dialog";
 
 export function TransactionTable( { 
   transactions, 
   total,
   page,
-  limit
+  limit,
+  categories = [],
+  feeRules = []
 }: { 
   transactions: any[];
   total: number;
   page: number;
   limit: number;
+  categories?: any[];
+  feeRules?: any[];
 } ) {
   const { data : session } = useSession();
   const isSuperAdmin = ( session?.user as any )?.role === ROLES.SUPERADMIN;
+
+  const handleDelete = async ( id: string ) => {
+    if ( !confirm( "Apakah Anda yakin ingin menghapus transaksi ini?" ) ) return;
+    
+    const res = await deleteTransaction( id );
+    if ( res.success ) {
+      toast.success( "Transaksi berhasil dihapus" );
+    } else {
+      toast.error( res.error || "Gagal menghapus transaksi" );
+    }
+  };
 
   const groups = transactions.reduce( ( acc: any, tx: any ) => {
     const dateKey = format( new Date( tx.createdAt ), "yyyy-MM-dd" );
@@ -71,12 +91,13 @@ export function TransactionTable( {
               <TableHead className="text-right">Fee Pelanggan</TableHead>
               {isSuperAdmin && <TableHead className="text-right">Laba Agen</TableHead>}
               <TableHead className="text-right">Total Bayar</TableHead>
+              {isSuperAdmin && <TableHead className="text-right w-[100px]">Aksi</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {transactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isSuperAdmin ? 6 : 5}
+                <TableCell colSpan={isSuperAdmin ? 7 : 5}
                   className="h-24 text-center text-muted-foreground"
                 >
                     Tidak ada transaksi ditemukan.
@@ -110,14 +131,14 @@ export function TransactionTable( {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right font-bold text-foreground/70"
-                        colSpan={isSuperAdmin ? 4 : 3}
+                        colSpan={isSuperAdmin ? 5 : 3}
                       >
                         {formatIDR( totalAmount )}
                       </TableCell>
                     </TableRow>
                     {dayTransactions.map( ( tx: any, index: number ) => (
                       <TableRow key={tx.id}
-                        className={cn( "hover:bg-primary/5 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/5" )}
+                        className={cn( "hover:bg-primary/5 transition-colors group", index % 2 === 0 ? "bg-white" : "bg-muted/5" )}
                       >
                         <TableCell className="text-muted-foreground text-[10px] font-medium">
                           {format( new Date( tx.createdAt ), "HH:mm" )}
@@ -158,6 +179,32 @@ export function TransactionTable( {
                         <TableCell className="text-right font-bold text-primary">
                           {formatIDR( Number( tx.totalPaid ) )}
                         </TableCell>
+                        {isSuperAdmin && (
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <TransactionFormDialog 
+                                initialData={tx}
+                                categories={categories}
+                                feeRules={feeRules}
+                                trigger={
+                                  <Button variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                }
+                              />
+                              <Button variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete( tx.id )}
+                                className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ) )}
                   </React.Fragment>

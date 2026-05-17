@@ -222,3 +222,57 @@ export async function getDashboardStats( period: "daily" | "monthly" = "daily" )
     },
   };
 }
+
+export async function updateTransaction( id: string, data: {
+  categoryId: string;
+  feeRuleId?: string;
+  transactionAmount: number;
+  customerFee: number;
+  briFee: number;
+  agentProfit: number;
+  totalPaid: number;
+  customerName?: string;
+  note?: string;
+} ) {
+  try {
+    const session = await getServerSession( authOptions );
+    if ( !session ) throw new Error( "Unauthorized" );
+
+    const transaction = await prisma.transaction.update( {
+      where : { id },
+      data,
+    } );
+
+    revalidatePath( "/transactions" );
+    revalidatePath( "/" );
+
+    return { 
+      success     : true, 
+      transaction : JSON.parse( JSON.stringify( transaction ) ) 
+    };
+  } catch ( error: any ) {
+    return { success : false, error : error.message };
+  }
+}
+
+export async function deleteTransaction( id: string ) {
+  try {
+    const session = await getServerSession( authOptions );
+    if ( !session ) throw new Error( "Unauthorized" );
+    
+    if ( ( session.user as any ).role !== "superadmin" ) {
+      throw new Error( "Unauthorized: Super Admin access required" );
+    }
+
+    await prisma.transaction.delete( {
+      where : { id },
+    } );
+
+    revalidatePath( "/transactions" );
+    revalidatePath( "/" );
+
+    return { success : true };
+  } catch ( error: any ) {
+    return { success : false, error : error.message };
+  }
+}

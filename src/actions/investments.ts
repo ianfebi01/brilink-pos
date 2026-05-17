@@ -62,3 +62,47 @@ export async function createInvestment( data: {
     return { success : false, error : error.message };
   }
 }
+
+export async function updateInvestment( id: string, data: {
+  amount: number;
+  note?: string;
+  investmentDate: Date;
+} ) {
+  try {
+    await checkSuperAdmin();
+    // Validate partial data (ignoring createdById for update)
+    const partialSchema = investmentSchema.pick( { amount : true, note : true, investmentDate : true } );
+    partialSchema.parse( data );
+    
+    const investment = await prisma.dailyInvestment.update( {
+      where : { id },
+      data,
+    } );
+    
+    revalidatePath( "/investments" );
+    revalidatePath( "/" );
+    
+    return { 
+      success     : true, 
+      investment : JSON.parse( JSON.stringify( investment ) ) 
+    };
+  } catch ( error: any ) {
+    return { success : false, error : error.message };
+  }
+}
+
+export async function deleteInvestment( id: string ) {
+  try {
+    await checkSuperAdmin();
+    await prisma.dailyInvestment.delete( {
+      where : { id },
+    } );
+    
+    revalidatePath( "/investments" );
+    revalidatePath( "/" );
+    
+    return { success : true };
+  } catch ( error: any ) {
+    return { success : false, error : error.message };
+  }
+}

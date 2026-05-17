@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { calculateTransaction } from "@/features/formulas/engine";
-import { createTransaction } from "@/actions/transactions";
+import { createTransaction, updateTransaction } from "@/actions/transactions";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { LayoutDashboard, Zap } from "lucide-react";
@@ -34,6 +34,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function TransactionForm( {
   id,
+  initialData,
   categories,
   feeRules,
   onSuccess,
@@ -42,6 +43,7 @@ export function TransactionForm( {
   onValidityChange,
 }: {
   id?: string;
+  initialData?: any;
   categories: any[];
   feeRules: any[];
   onSuccess: () => void;
@@ -57,11 +59,11 @@ export function TransactionForm( {
     resolver      : zodResolver( formSchema ),
     mode          : "onBlur",
     defaultValues : {
-      categoryId   : "",
-      feeRuleId    : "",
-      amount       : 0,
-      customerName : "",
-      note         : "",
+      categoryId   : initialData?.categoryId || "",
+      feeRuleId    : initialData?.feeRuleId || "",
+      amount       : initialData ? Number( initialData.transactionAmount ) : 0,
+      customerName : initialData?.customerName || "",
+      note         : initialData?.note || "",
     },
   } );
 
@@ -135,7 +137,9 @@ export function TransactionForm( {
     }
 
     setLoading( true );
-    const res = await createTransaction( {
+    let res;
+    
+    const payload = {
       categoryId        : values.categoryId,
       feeRuleId         : values.feeRuleId || undefined,
       transactionAmount : values.amount,
@@ -145,16 +149,24 @@ export function TransactionForm( {
       totalPaid         : calcResult.total_paid,
       customerName      : values.customerName,
       note              : values.note,
-      createdById       : ( session?.user as any )?.id,
-    } );
+    };
+
+    if ( initialData ) {
+      res = await updateTransaction( initialData.id, payload );
+    } else {
+      res = await createTransaction( {
+        ...payload,
+        createdById : ( session?.user as any )?.id,
+      } );
+    }
 
     setLoading( false );
     if ( res.success ) {
-      toast.success( "Transaksi berhasil dibuat" );
+      toast.success( initialData ? "Transaksi berhasil diperbarui" : "Transaksi berhasil dibuat" );
       form.reset();
       onSuccess();
     } else {
-      toast.error( res.error || "Gagal membuat transaksi" );
+      toast.error( res.error || "Gagal menyimpan transaksi" );
     }
   };
 

@@ -48,6 +48,8 @@ export default async function TransactionsPage( {
         total={txRes.total || 0}
         page={page}
         limit={limit}
+        categories={catRes.categories || []}
+        feeRules={ruleRes.rules || []}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createInvestment } from "@/actions/investments";
+import { createInvestment, updateInvestment } from "@/actions/investments";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
@@ -21,11 +21,13 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function InvestmentForm( { 
   id,
+  initialData,
   onSuccess,
   onLoadingChange,
   onValidityChange,
 }: { 
   id?: string;
+  initialData?: any;
   onSuccess: () => void;
   onLoadingChange?: ( loading: boolean ) => void;
   onValidityChange?: ( isValid: boolean ) => void;
@@ -37,9 +39,9 @@ export function InvestmentForm( {
     resolver      : zodResolver( formSchema ),
     mode          : "onBlur",
     defaultValues : {
-      date   : new Date().toISOString().split( "T" )[0],
-      amount : 0,
-      note   : "",
+      date   : initialData ? new Date( initialData.investmentDate ).toISOString().split( "T" )[0] : new Date().toISOString().split( "T" )[0],
+      amount : initialData ? Number( initialData.amount ) : 0,
+      note   : initialData?.note || "",
     },
   } );
 
@@ -59,19 +61,30 @@ export function InvestmentForm( {
 
   const onSubmit = async ( values: FormValues ) => {
     setLoading( true );
-    const res = await createInvestment( {
-      amount         : values.amount,
-      note           : values.note,
-      investmentDate : new Date( values.date ),
-      createdById    : ( session?.user as any )?.id,
-    } );
+    let res;
+    
+    if ( initialData ) {
+      res = await updateInvestment( initialData.id, {
+        amount         : values.amount,
+        note           : values.note,
+        investmentDate : new Date( values.date ),
+      } );
+    } else {
+      res = await createInvestment( {
+        amount         : values.amount,
+        note           : values.note,
+        investmentDate : new Date( values.date ),
+        createdById    : ( session?.user as any )?.id,
+      } );
+    }
+    
     setLoading( false );
 
     if ( res.success ) {
-      toast.success( "Investasi berhasil dicatat" );
+      toast.success( initialData ? "Investasi berhasil diperbarui" : "Investasi berhasil dicatat" );
       onSuccess();
     } else {
-      toast.error( res.error || "Gagal mencatat investasi" );
+      toast.error( res.error || "Gagal menyimpan investasi" );
     }
   };
 
