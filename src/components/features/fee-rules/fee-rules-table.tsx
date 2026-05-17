@@ -32,8 +32,6 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
     }
   };
 
-
-
   if ( !rules.length ) {
     return (
       <div className="rounded-md border p-8 text-center text-muted-foreground">
@@ -69,7 +67,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                 <TableCell className="font-medium">
                   <div className="flex flex-col">
                     <span className="text-sm">{rule.name}</span>
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rule ID: {rule.id.slice(-6)}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Rule ID: {rule.id.slice( -6 )}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -79,11 +77,13 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1.5">
-                    {tiers.slice(0, 3).map( ( t: any, i: number ) => (
-                      <div key={i} className="flex items-center gap-2 group">
+                    {tiers.slice( 0, 3 ).map( ( t: any, i: number ) => (
+                      <div key={i}
+                        className="flex items-center gap-2 group"
+                      >
                         <span className="text-[9px] font-bold text-muted-foreground bg-muted px-1 rounded">T{i + 1}</span>
                         <span className="text-[11px] text-foreground font-medium">
-                          {Number(t.minAmount).toLocaleString('id-ID')} - {t.maxAmount ? Number(t.maxAmount).toLocaleString('id-ID') : "∞"}
+                          {Number( t.minAmount ).toLocaleString( 'id-ID' )} - {t.maxAmount ? Number( t.maxAmount ).toLocaleString( 'id-ID' ) : "∞"}
                         </span>
                       </div>
                     ) )}
@@ -97,11 +97,13 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                 <TableCell className="max-w-md">
                   <div className="flex flex-col gap-3 py-1">
                     {tiers.slice( 0, 1 ).map( ( tier: any, i: number ) => (
-                      <div key={i} className="space-y-1.5">
+                      <div key={i}
+                        className="space-y-1.5"
+                      >
                         <div className="flex flex-wrap gap-1.5">
                           {Object.entries( tier.formulas || {} ).map( ( [k, v]: [string, any] ) => {
                             let display = "";
-                            if ( v.type === "fixed" ) display = `Rp${Number(v.value).toLocaleString('id-ID')}`;
+                            if ( v.type === "fixed" ) display = `Rp${Number( v.value ).toLocaleString( 'id-ID' )}`;
                             else if ( v.type === "percentage" ) display = `${v.value}%`;
                             else if ( v.type === "formula" ) display = "ƒ(x)";
 
