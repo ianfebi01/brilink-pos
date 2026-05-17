@@ -216,6 +216,7 @@ export async function getDashboardStats( period: "daily" | "monthly" = "daily" )
       totalIncome            : Number( incomeSum._sum.agentProfit || 0 ),
       totalTransactionAmount : Number( txSum._sum.transactionAmount || 0 ),
       totalInvestments       : Number( investmentsSum._sum.amount || 0 ),
+      remainingInvestment    : Number( investmentsSum._sum.amount || 0 ) - Number( txSum._sum.transactionAmount || 0 ),
       recentTransactions,
       chartData,
     },

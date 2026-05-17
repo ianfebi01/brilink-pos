@@ -3,12 +3,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getDashboardStats } from '@/actions/transactions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ReceiptText, TrendingUp, Activity, PiggyBank } from 'lucide-react'
+import { ReceiptText, TrendingUp, Activity, PiggyBank, Wallet } from 'lucide-react'
 
 import { OverviewChart } from '@/components/features/dashboard/overview-chart'
 import { RecentActivity } from '@/components/features/dashboard/recent-activity'
 
 import { PeriodSwitcher } from '@/components/features/dashboard/period-switcher'
+import { cn } from '@/lib/utils'
 
 function formatIDR( amount: number ) {
   return new Intl.NumberFormat( 'id-ID', {
@@ -97,6 +98,15 @@ export default async function DashboardPage( {
           <CardContent>
             <div className="text-2xl font-bold">
               {formatIDR( data?.totalInvestments || 0 )}
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground uppercase font-medium">Sisa:</span>
+              <span className={cn(
+                "text-xs font-bold",
+                ( data?.remainingInvestment || 0 ) < 0 ? "text-red-600" : "text-blue-600"
+              )}>
+                {formatIDR( data?.remainingInvestment || 0 )}
+              </span>
             </div>
           </CardContent>
         </Card>
