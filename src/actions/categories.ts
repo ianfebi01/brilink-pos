@@ -27,8 +27,15 @@ export async function getCategories() {
 export async function createCategory( data: { name: string } ) {
   try {
     await checkSuperAdmin();
+    
+    // Generate a simple code/slug from name
+    const code = data.name.toLowerCase().replace( /[^a-z0-9]+/g, "-" ).replace( /^-+|-+$/g, "" ) || `cat-${Date.now()}`;
+
     const category = await prisma.transactionCategory.create( {
-      data,
+      data : {
+        name : data.name,
+        code,
+      },
     } );
     revalidatePath( "/categories" );
     revalidatePath( "/fee-rules" );
