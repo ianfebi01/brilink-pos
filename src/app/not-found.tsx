@@ -110,14 +110,14 @@ export default function NotFound() {
               <Link href="/"
                 passHref
               >
-                <Button className="w-full h-11 text-base font-medium shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Button className="w-full">
                   Kembali ke Dashboard
                 </Button>
               </Link>
             </div>
             <div className="animate-item text-center">
               <Link href="/login"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 Atau masuk kembali ke sistem
               </Link>

@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import NextTopLoader from "nextjs-toploader";
 
 const poppins = Poppins( { 
   subsets  : ["latin"], 
@@ -28,6 +29,9 @@ export default function RootLayout( {
         suppressHydrationWarning
       >
         <Providers>
+          <NextTopLoader color="#2563eb"
+            showSpinner={false}
+          />
           {children}
           <Toaster />
         </Providers>
