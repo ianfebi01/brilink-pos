@@ -40,7 +40,7 @@ export async function createTransaction( data: {
     revalidatePath( "/" );
     
     return { 
-      success : true, 
+      success     : true, 
       transaction : {
         ...transaction,
         transactionAmount : Number( transaction.transactionAmount ),
@@ -51,6 +51,7 @@ export async function createTransaction( data: {
       }
     };
   } catch ( error: any ) {
+    // eslint-disable-next-line no-console
     console.error( error );
     
     return { success : false, error : error.message };
