@@ -153,58 +153,45 @@ async function main() {
   } )
   console.log( `Created fee rules` )
 
-  // 4. Create sample transactions (optional)
+  // 4. Create sample transactions (10 per day for last 7 days)
+  const transactionData = []
+  const now = new Date()
+  
+  for ( let i = 0; i < 7; i++ ) {
+    const day = new Date( now )
+    day.setDate( now.getDate() - i )
+    
+    // Random number of transactions between 5 and 20 per day
+    const transactionsPerDay = 5 + Math.floor( Math.random() * 16 )
+    
+    for ( let j = 0; j < transactionsPerDay; j++ ) {
+      const transactionDate = new Date( day )
+      // Random hour between 8 AM and 9 PM
+      transactionDate.setHours( 8 + Math.floor( Math.random() * 13 ), Math.floor( Math.random() * 60 ), 0, 0 )
+      
+      const isTransfer = Math.random() > 0.5
+      const category = isTransfer ? catTransfer : catTarikTunai
+      const rule = isTransfer ? ruleTransfer : ruleTarikTunai
+      const amount = 100000 + ( Math.floor( Math.random() * 10 ) * 100000 )
+      
+      transactionData.push( {
+        categoryId        : category.id,
+        feeRuleId         : rule.id,
+        transactionAmount : amount,
+        customerFee       : 5000,
+        briFee            : 2500,
+        agentProfit       : 2500,
+        totalPaid         : amount + 5000,
+        customerName      : `Nasabah ${i}-${j}`,
+        note              : `Transaksi otomatis ${i}-${j}`,
+        createdById       : admin.id,
+        createdAt         : transactionDate
+      } )
+    }
+  }
+
   await prisma.transaction.createMany( {
-    data : [
-      {
-        categoryId        : catTransfer.id,
-        feeRuleId         : ruleTransfer.id,
-        transactionAmount : 100000,
-        customerFee       : 5000,
-        briFee            : 2500,
-        agentProfit       : 2500,
-        totalPaid         : 105000,
-        customerName      : 'Budi Santoso',
-        note              : 'Transfer ke rekening istri',
-        createdById       : admin.id
-      },
-      {
-        categoryId        : catTransfer.id,
-        feeRuleId         : ruleTransfer.id,
-        transactionAmount : 500000,
-        customerFee       : 5000,
-        briFee            : 2500,
-        agentProfit       : 2500,
-        totalPaid         : 505000,
-        customerName      : 'Siti Aminah',
-        note              : 'Bayar cicilan',
-        createdById       : admin.id
-      },
-      {
-        categoryId        : catTarikTunai.id,
-        feeRuleId         : ruleTarikTunai.id,
-        transactionAmount : 50000,
-        customerFee       : 5000,
-        briFee            : 3000,
-        agentProfit       : 2000,
-        totalPaid         : 55000,
-        customerName      : 'Andi Setiawan',
-        note              : 'Tarik tunai uang saku',
-        createdById       : admin.id
-      },
-      {
-        categoryId        : catTarikTunai.id,
-        feeRuleId         : ruleTarikTunai.id,
-        transactionAmount : 100000,
-        customerFee       : 5000,
-        briFee            : 3000,
-        agentProfit       : 2000,
-        totalPaid         : 105000,
-        customerName      : 'Rina Maryana',
-        note              : 'Tarik tunai belanja',
-        createdById       : admin.id
-      }
-    ]
+    data : transactionData
   } )
   console.log( `Created sample transactions` )
 }
