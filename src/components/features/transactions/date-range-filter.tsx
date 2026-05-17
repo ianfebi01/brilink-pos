@@ -96,7 +96,7 @@ export function DateRangeFilter( {
                 >
                   <div
                     role="button"
-                    className="p-1 hover:bg-muted rounded-md cursor-pointer"
+                    className="cursor-pointer"
                     onClick={( e ) => {
                       e.preventDefault();
                       clearFilter();
