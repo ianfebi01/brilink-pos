@@ -31,14 +31,16 @@ export function FeeRuleFormDialog( {
     <Dialog open={open}
       onOpenChange={setOpen}
     >
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Aturan Baru
-          </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          trigger || (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Aturan Baru
+            </Button>
+          )
+        }
+      />
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
