@@ -14,6 +14,7 @@ import { deleteFeeRule, duplicateFeeRule } from "@/actions/fee-rules";
 import { FeeRuleFormDialog } from "./fee-rule-form-dialog";
 import { toast } from "sonner";
 import { useTransition } from "react";
+import { cn } from "@/lib/utils";
 
 export function FeeRulesTable( { rules, categories }: { rules: any[]; categories: any[] } ) {
   const [isPending, startTransition] = useTransition();
@@ -51,7 +52,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
   }
 
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
@@ -63,7 +64,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rules.map( ( rule ) => {
+          {rules.map( ( rule, index ) => {
             const range = rule.minAmount && rule.maxAmount 
               ? `${rule.minAmount} - ${rule.maxAmount}`
               : rule.minAmount ? `> ${rule.minAmount}`
@@ -75,7 +76,9 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
               : rule.formulaJson;
 
             return (
-              <TableRow key={rule.id}>
+              <TableRow key={rule.id}
+                className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
+              >
                 <TableCell className="font-medium">{rule.name}</TableCell>
                 <TableCell>{rule.category?.name}</TableCell>
                 <TableCell>{range}</TableCell>

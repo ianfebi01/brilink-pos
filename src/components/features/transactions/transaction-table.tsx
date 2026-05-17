@@ -68,7 +68,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
 
             return (
               <React.Fragment key={date}>
-                <TableRow className="bg-trnsparent hover:bg-muted/30 border-b">
+                <TableRow className="bg-transparent hover:bg-muted/30 border-b">
                   <TableCell className="py-2">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-foreground/80">{dateLabel}</span>
@@ -89,7 +89,7 @@ export function TransactionTable( { transactions }: { transactions: any[] } ) {
                 </TableRow>
                 {dayTransactions.map( ( tx: any, index: number ) => (
                   <TableRow key={tx.id}
-                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/5" )}
+                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
                   >
                     <TableCell className="text-muted-foreground text-xs">
                       {format( new Date( tx.createdAt ), "HH:mm" )}

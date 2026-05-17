@@ -41,7 +41,7 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
   const sortedDates = Object.keys( groups ).sort( ( a, b ) => b.localeCompare( a ) );
 
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow className="hover:bg-transparent border-none">
@@ -65,7 +65,7 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
 
             return (
               <React.Fragment key={date}>
-                <TableRow className="bg-muted/20 hover:bg-muted/30 border-b">
+                <TableRow className="bg-transparent hover:bg-muted/30 border-b">
                   <TableCell className="py-2">
                     <span className="font-semibold text-foreground/80">{dateLabel}</span>
                   </TableCell>
@@ -82,7 +82,7 @@ export function InvestmentsTable( { investments }: { investments: any[] } ) {
                 </TableRow>
                 {dayInvestments.map( ( inv: any, index: number ) => (
                   <TableRow key={inv.id}
-                    className={cn( "hover:bg-muted/5 transition-colors", index === dayInvestments.length - 1 ? "border-b-2 border-muted" : "border-b" )}
+                    className={cn( "hover:bg-primary/10 transition-colors", index % 2 === 0 ? "bg-white" : "bg-muted/50" )}
                   >
                     <TableCell className="text-muted-foreground text-xs">
                       {format( new Date( inv.investmentDate ), "HH:mm" )}
