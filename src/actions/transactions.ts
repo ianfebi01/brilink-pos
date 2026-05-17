@@ -107,35 +107,46 @@ export async function getTransactions( limit = 50, offset = 0 ) {
   }
 }
 
-export async function getDashboardStats() {
-  const today = new Date();
-  today.setHours( 0, 0, 0, 0 );
+export async function getDashboardStats( period: "daily" | "monthly" = "daily" ) {
+  const now = new Date();
+  
+  // Format current date in Asia/Jakarta
+  const jakartaDateStr = new Intl.DateTimeFormat( "en-CA", { timeZone : "Asia/Jakarta" } ).format( now );
+  
+  // 00:00:00 Today in Asia/Jakarta
+  const todayStart = new Date( `${jakartaDateStr}T00:00:00+07:00` );
 
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate( today.getDate() - 7 );
-  sevenDaysAgo.setHours( 0, 0, 0, 0 );
+  // 00:00:00 First day of current month in Asia/Jakarta
+  const startOfMonth = new Date( todayStart );
+  startOfMonth.setDate( 1 );
+
+  const startDate = period === "daily" ? todayStart : startOfMonth;
+  
+  // For chart: 7 days for daily, 30 days for monthly
+  const chartStartDate = new Date( todayStart );
+  chartStartDate.setDate( todayStart.getDate() - ( period === "daily" ? 7 : 30 ) );
 
   const [
-    todayTransactionsCount,
-    todayIncomeSum,
-    todayTxSum,
-    todayInvestmentsSum,
+    transactionsCount,
+    incomeSum,
+    txSum,
+    investmentsSum,
     recentTransactions,
     dailyChartDataRaw,
   ] = await Promise.all( [
     prisma.transaction.count( {
-      where : { createdAt : { gte : today } },
+      where : { createdAt : { gte : startDate } },
     } ),
     prisma.transaction.aggregate( {
-      where : { createdAt : { gte : today } },
+      where : { createdAt : { gte : startDate } },
       _sum  : { agentProfit : true },
     } ),
     prisma.transaction.aggregate( {
-      where : { createdAt : { gte : today } },
+      where : { createdAt : { gte : startDate } },
       _sum  : { transactionAmount : true },
     } ),
     prisma.dailyInvestment.aggregate( {
-      where : { investmentDate : { gte : today } },
+      where : { investmentDate : { gte : startDate } },
       _sum  : { amount : true },
     } ),
     prisma.transaction.findMany( {
@@ -145,7 +156,7 @@ export async function getDashboardStats() {
     } ),
     prisma.transaction.groupBy( {
       by    : ["createdAt"],
-      where : { createdAt : { gte : sevenDaysAgo } },
+      where : { createdAt : { gte : chartStartDate } },
       _sum  : { 
         agentProfit       : true,
         transactionAmount : true 
@@ -153,32 +164,40 @@ export async function getDashboardStats() {
     } ),
   ] );
 
-  // Process chart data to be more useful (grouped by actual date)
+  // Process chart data using local timezone (Asia/Jakarta)
   const chartDataMap = new Map();
+  const dateFormatter = new Intl.DateTimeFormat( "en-CA", {
+    timeZone : "Asia/Jakarta",
+    year     : "numeric",
+    month    : "2-digit",
+    day      : "2-digit",
+  } );
+
   dailyChartDataRaw.forEach( ( item ) => {
-    const dateStr = item.createdAt.toISOString().split( "T" )[0];
-    const existing = chartDataMap.get( dateStr ) || { totalIncome : 0, totalVolume : 0 };
+    // dateFormatter.format returns YYYY-MM-DD for en-CA
+    const dateStr = dateFormatter.format( item.createdAt );
+    const existing = chartDataMap.get( dateStr ) || { income : 0, volume : 0 };
     chartDataMap.set( dateStr, {
-      totalIncome : existing.totalIncome + Number( item._sum.agentProfit || 0 ),
-      totalVolume : existing.totalVolume + Number( item._sum.transactionAmount || 0 ),
+      income : existing.income + Number( item._sum.agentProfit || 0 ),
+      volume : existing.volume + Number( item._sum.transactionAmount || 0 ),
     } );
   } );
 
   const chartData = Array.from( chartDataMap.entries() )
     .map( ( [date, data] ) => ( {
       date,
-      income : data.totalIncome,
-      volume : data.totalVolume,
+      income : data.income,
+      volume : data.volume,
     } ) )
     .sort( ( a, b ) => a.date.localeCompare( b.date ) );
 
   return {
     success : true,
     data    : {
-      transactionsCount      : todayTransactionsCount,
-      totalIncome            : Number( todayIncomeSum._sum.agentProfit || 0 ),
-      totalTransactionAmount : Number( todayTxSum._sum.transactionAmount || 0 ),
-      totalInvestments       : Number( todayInvestmentsSum._sum.amount || 0 ),
+      transactionsCount      : transactionsCount,
+      totalIncome            : Number( incomeSum._sum.agentProfit || 0 ),
+      totalTransactionAmount : Number( txSum._sum.transactionAmount || 0 ),
+      totalInvestments       : Number( investmentsSum._sum.amount || 0 ),
       recentTransactions,
       chartData,
     },

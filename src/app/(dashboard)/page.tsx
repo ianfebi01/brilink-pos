@@ -8,6 +8,8 @@ import { ReceiptText, TrendingUp, Activity, PiggyBank } from 'lucide-react'
 import { OverviewChart } from '@/components/features/dashboard/overview-chart'
 import { RecentActivity } from '@/components/features/dashboard/recent-activity'
 
+import { PeriodSwitcher } from '@/components/features/dashboard/period-switcher'
+
 function formatIDR( amount: number ) {
   return new Intl.NumberFormat( 'id-ID', {
     style                 : 'currency',
@@ -16,29 +18,37 @@ function formatIDR( amount: number ) {
   } ).format( amount )
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage( { 
+  searchParams 
+}: { 
+  searchParams: { period?: string } 
+} ) {
   const session = await getServerSession( authOptions )
+  const period = ( ( await searchParams ).period || "daily" ) as "daily" | "monthly";
 
   if ( !session ) {
     redirect( '/login' )
   }
 
-  const { data } = await getDashboardStats()
+  const { data } = await getDashboardStats( period )
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Beranda</h2>
-        <p className="text-muted-foreground">
-          Selamat datang kembali, {session.user?.name}. Berikut adalah ringkasan Anda hari ini.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Beranda</h2>
+          <p className="text-muted-foreground">
+            Selamat datang kembali, {session.user?.name}. Berikut adalah ringkasan Anda {period === "daily" ? "hari ini" : "bulan ini"}.
+          </p>
+        </div>
+        <PeriodSwitcher />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Transaksi Hari Ini
+              Total Transaksi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -52,7 +62,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Laba Hari Ini
+              Total Laba {period === "daily" ? "Hari Ini" : "Bulan Ini"}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -66,7 +76,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Volume Transaksi
+              Volume Transaksi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
             </CardTitle>
             <ReceiptText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -80,7 +90,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Investasi
+              Total Investasi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
             </CardTitle>
             <PiggyBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
