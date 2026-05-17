@@ -26,6 +26,8 @@ function formatIDR( amount: number ) {
   } ).format( amount );
 }
 
+import { DateRangeFilter } from "./date-range-filter";
+
 export function TransactionTable( { 
   transactions, 
   total,
@@ -52,10 +54,11 @@ export function TransactionTable( {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <SearchInput placeholder="Cari nama pelanggan atau catatan..." 
-          className="flex-1"
+          className="w-full md:max-w-sm"
         />
+        {isSuperAdmin && <DateRangeFilter />}
       </div>
 
       <div className="overflow-x-auto">

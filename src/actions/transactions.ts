@@ -58,7 +58,7 @@ export async function createTransaction( data: {
   }
 }
 
-export async function getTransactions( limit = 50, offset = 0, query?: string ) {
+export async function getTransactions( limit = 50, offset = 0, query?: string, from?: string, to?: string ) {
   try {
     const session = await getServerSession( authOptions );
     const userRole = ( session?.user as any )?.role;
@@ -72,13 +72,18 @@ export async function getTransactions( limit = 50, offset = 0, query?: string ) 
       ];
     }
 
-    if ( userRole === "admin" ) {
-      const today = new Date();
-      today.setHours( 0, 0, 0, 0 );
-      where = { 
-        ...where,
-        createdAt : { gte : today } 
+    if ( from || to ) {
+      where.createdAt = {
+        ...( from && { gte : new Date( `${from}T00:00:00+07:00` ) } ),
+        ...( to && { lte : new Date( `${to}T23:59:59+07:00` ) } ),
       };
+    } else if ( userRole === "admin" ) {
+      // Default to today for admins if no date range is specified
+      const now = new Date();
+      const jakartaDateStr = new Intl.DateTimeFormat( "en-CA", { timeZone : "Asia/Jakarta" } ).format( now );
+      const todayStart = new Date( `${jakartaDateStr}T00:00:00+07:00` );
+      
+      where.createdAt = { gte : todayStart };
     }
 
     const [transactions, total] = await Promise.all( [

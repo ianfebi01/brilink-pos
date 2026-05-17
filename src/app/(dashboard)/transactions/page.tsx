@@ -6,16 +6,18 @@ import { TransactionFormDialog } from "@/components/features/transactions/transa
 export default async function TransactionsPage( {
   searchParams,
 }: {
-  searchParams: { page?: string; q?: string };
+  searchParams: { page?: string; q?: string; from?: string; to?: string };
 } ) {
   const params = await searchParams;
   const page = Number( params.page ) || 1;
   const limit = 20;
   const offset = ( page - 1 ) * limit;
   const query = params.q || "";
+  const from = params.from || "";
+  const to = params.to || "";
 
   const [txRes, catRes, ruleRes] = await Promise.all( [
-    getTransactions( limit, offset, query ),
+    getTransactions( limit, offset, query, from, to ),
     getCategories(),
     getFeeRules()
   ] );
