@@ -45,7 +45,7 @@ export default async function DashboardPage( {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Transaksi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
@@ -59,7 +59,7 @@ export default async function DashboardPage( {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Laba {period === "daily" ? "Hari Ini" : "Bulan Ini"}
@@ -73,7 +73,7 @@ export default async function DashboardPage( {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Volume Transaksi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
@@ -87,7 +87,7 @@ export default async function DashboardPage( {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Investasi {period === "daily" ? "Hari Ini" : "Bulan Ini"}
@@ -103,7 +103,7 @@ export default async function DashboardPage( {
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
+        <Card className="lg:col-span-4 bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader>
             <CardTitle>Ringkasan Laba</CardTitle>
             <CardDescription>
@@ -114,7 +114,7 @@ export default async function DashboardPage( {
             <OverviewChart data={data?.chartData || []} />
           </CardContent>
         </Card>
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 bg-muted/40 border-none ring-0 shadow-none">
           <CardHeader>
             <CardTitle>Aktivitas Terkini</CardTitle>
             <CardDescription>

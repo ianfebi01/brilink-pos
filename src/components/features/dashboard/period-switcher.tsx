@@ -16,7 +16,7 @@ export function PeriodSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border">
+    <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg">
       <Button
         variant={currentPeriod === "daily" ? "secondary" : "ghost"}
         size="sm"
