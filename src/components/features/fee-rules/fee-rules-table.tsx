@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Trash, Copy, Pencil } from "lucide-react";
-import { deleteFeeRule, duplicateFeeRule } from "@/actions/fee-rules";
+import { deleteFeeRule } from "@/actions/fee-rules";
 import { FeeRuleFormDialog } from "./fee-rule-form-dialog";
 import { toast } from "sonner";
 import { useTransition } from "react";
@@ -32,16 +32,7 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
     }
   };
 
-  const handleDuplicate = ( id: string ) => {
-    startTransition( async () => {
-      const res = await duplicateFeeRule( id );
-      if ( res.success ) {
-        toast.success( "Rule duplicated" );
-      } else {
-        toast.error( res.error || "Failed to duplicate rule" );
-      }
-    } );
-  };
+
 
   if ( !rules.length ) {
     return (
@@ -65,15 +56,11 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
         </TableHeader>
         <TableBody>
           {rules.map( ( rule, index ) => {
-            const range = rule.minAmount && rule.maxAmount 
-              ? `${rule.minAmount} - ${rule.maxAmount}`
-              : rule.minAmount ? `> ${rule.minAmount}`
-                : rule.maxAmount ? `< ${rule.maxAmount}`
-                  : "Any amount";
-            
             const parsedFormula = typeof rule.formulaJson === "string" 
               ? JSON.parse( rule.formulaJson ) 
               : rule.formulaJson;
+            const tiers = Array.isArray( parsedFormula ) ? parsedFormula : [];
+            const tierCount = tiers.length;
 
             return (
               <TableRow key={rule.id}
@@ -81,29 +68,47 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
               >
                 <TableCell className="font-medium">{rule.name}</TableCell>
                 <TableCell>{rule.category?.name}</TableCell>
-                <TableCell>{range}</TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries( parsedFormula || {} ).map( ( [k, v]: [string, any] ) => {
-                      let display = "";
-                      if ( v.type === "fixed" ) display = `Rp${v.value}`;
-                      else if ( v.type === "percentage" ) display = `${v.value}%`;
-                      else if ( v.type === "formula" ) display = v.expression;
-                      
-                      return (
-                        <span key={k}
-                          className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground capitalize"
-                        >
-                          {k.replace( /_/g, ' ' )}: {display}
-                        </span>
-                      );
-                    } )}
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    {tiers.map( ( t: any, i: number ) => (
+                      <span key={i}
+                        className="text-[10px] text-muted-foreground whitespace-nowrap"
+                      >
+                        T{i + 1}: {t.minAmount.toLocaleString()} - {t.maxAmount.toLocaleString()}
+                      </span>
+                    ) )}
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-md">
+                  <div className="flex flex-col gap-2">
+                    {tiers.slice( 0, 2 ).map( ( tier: any, i: number ) => (
+                      <div key={i}
+                        className="flex flex-wrap gap-1 border-l-2 border-primary/20 pl-2"
+                      >
+                        {Object.entries( tier.formulas || {} ).map( ( [k, v]: [string, any] ) => {
+                          let display = "";
+                          if ( v.type === "fixed" ) display = `Rp${v.value}`;
+                          else if ( v.type === "percentage" ) display = `${v.value}%`;
+                          else if ( v.type === "formula" ) display = v.expression;
+                          
+                          return (
+                            <span key={k}
+                              className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[9px] font-medium text-muted-foreground capitalize"
+                            >
+                              {k.replace( /_/g, ' ' )}: {display}
+                            </span>
+                          );
+                        } )}
+                      </div>
+                    ) )}
+                    {tierCount > 2 && <span className="text-[10px] italic text-muted-foreground">...and {tierCount - 2} more tiers</span>}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <FeeRuleFormDialog 
                       categories={categories}
+                      existingCategoryIds={rules.map( r => r.categoryId )}
                       initialData={rule}
                       trigger={
                         <Button 
@@ -117,16 +122,27 @@ export function FeeRulesTable( { rules, categories }: { rules: any[]; categories
                         </Button>
                       }
                     />
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                      onClick={() => handleDuplicate( rule.id )}
-                      disabled={isPending}
-                      title="Duplicate Rule"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
+                    <FeeRuleFormDialog 
+                      categories={categories}
+                      existingCategoryIds={rules.map( r => r.categoryId )}
+                      initialData={{
+                        ...rule,
+                        id         : undefined,
+                        name       : `${rule.name} (Copy)`,
+                        categoryId : "", 
+                      }}
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                          disabled={isPending}
+                          title="Duplicate Rule"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
                     <Button 
                       variant="ghost" 
                       size="icon" 

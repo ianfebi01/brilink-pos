@@ -35,13 +35,10 @@ model TransactionCategory {
 
 model FeeRule {
   id          String   @id @default(cuid())
-  categoryId  String
+  categoryId  String   @unique
   name        String
 
-  minAmount   Decimal?
-  maxAmount   Decimal?
-
-  formulaJson Json
+  formulaJson Json     // Now stores an array of tiers: [{ min, max, formulas }]
 
   isActive    Boolean  @default(true)
 

@@ -10,7 +10,12 @@ export async function getInvestments() {
       include : { createdBy : true },
     } );
     
-    return { success : true, investments };
+    const serializedInvestments = investments.map( ( inv ) => ( {
+      ...inv,
+      amount : Number( inv.amount ),
+    } ) );
+    
+    return { success : true, investments : serializedInvestments };
   } catch ( error: any ) {
     return { success : false, error : error.message };
   }
@@ -29,7 +34,10 @@ export async function createInvestment( data: {
     revalidatePath( "/investments" );
     revalidatePath( "/" );
     
-    return { success : true, investment };
+    return { 
+      success     : true, 
+      investment : JSON.parse( JSON.stringify( investment ) ) 
+    };
   } catch ( error: any ) {
     return { success : false, error : error.message };
   }

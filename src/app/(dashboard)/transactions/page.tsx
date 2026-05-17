@@ -10,6 +10,11 @@ export default async function TransactionsPage() {
     getFeeRules()
   ] );
 
+  if ( !txRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading transactions: {txRes.error}</div>;
+  if ( !catRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading categories: {catRes.error}</div>;
+  if ( !ruleRes.success ) return <div className="p-4 text-red-500 bg-red-50 border border-red-200 rounded-md">Error loading fee rules: {ruleRes.error}</div>;
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

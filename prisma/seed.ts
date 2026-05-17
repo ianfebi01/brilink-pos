@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 
@@ -9,6 +10,10 @@ function hashPassword( password: string ) {
 }
 
 async function main() {
+  // 0. Clean slate for re-seeding
+  await prisma.transaction.deleteMany()
+  await prisma.dailyInvestment.deleteMany()
+  
   // 1. Create superadmin
   const admin = await prisma.user.upsert( {
     where  : { username : 'admin' },
@@ -57,32 +62,93 @@ async function main() {
   console.log( `Created categories` )
 
   // 3. Create Example Fee Rules
-  const ruleTransfer = await prisma.feeRule.create( {
-    data : {
+  const ruleTransfer = await prisma.feeRule.upsert( {
+    where  : { categoryId : catTransfer.id },
+    update : {
+      name        : 'Standard Transfer Fee',
+      formulaJson : [
+        {
+          minAmount : 0,
+          maxAmount : 10000000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 5000 },
+            bri_fee      : { type : "fixed", value : 2500 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        }
+      ]
+    },
+    create : {
       categoryId  : catTransfer.id,
       name        : 'Standard Transfer Fee',
-      minAmount   : 1,
-      maxAmount   : 10000000,
-      formulaJson : {
-        customer_fee : { type : "fixed", value : 5000 },
-        bri_fee      : { type : "fixed", value : 2500 },
-        agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
-        total_paid   : { type : "formula", expression : "amount + customer_fee" }
-      }
+      formulaJson : [
+        {
+          minAmount : 0,
+          maxAmount : 10000000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 5000 },
+            bri_fee      : { type : "fixed", value : 2500 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        }
+      ]
     }
   } )
-  const ruleTarikTunai = await prisma.feeRule.create( {
-    data : {
+  
+  const ruleTarikTunai = await prisma.feeRule.upsert( {
+    where  : { categoryId : catTarikTunai.id },
+    update : {
+      name        : 'Tarik Tunai Rules',
+      formulaJson : [
+        {
+          minAmount : 10000,
+          maxAmount : 100000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 5000 },
+            bri_fee      : { type : "fixed", value : 3000 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        },
+        {
+          minAmount : 100001,
+          maxAmount : 1000000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 10000 },
+            bri_fee      : { type : "fixed", value : 5000 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        }
+      ]
+    },
+    create : {
       categoryId  : catTarikTunai.id,
-      name        : 'Tarik Tunai 10k-100k',
-      minAmount   : 10000,
-      maxAmount   : 100000,
-      formulaJson : {
-        customer_fee : { type : "fixed", value : 5000 },
-        bri_fee      : { type : "fixed", value : 3000 },
-        agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
-        total_paid   : { type : "formula", expression : "amount + customer_fee" }
-      }
+      name        : 'Tarik Tunai Rules',
+      formulaJson : [
+        {
+          minAmount : 10000,
+          maxAmount : 100000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 5000 },
+            bri_fee      : { type : "fixed", value : 3000 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        },
+        {
+          minAmount : 100001,
+          maxAmount : 1000000,
+          formulas  : {
+            customer_fee : { type : "fixed", value : 10000 },
+            bri_fee      : { type : "fixed", value : 5000 },
+            agent_profit : { type : "formula", expression : "customer_fee - bri_fee" },
+            total_paid   : { type : "formula", expression : "amount + customer_fee" }
+          }
+        }
+      ]
     }
   } )
   console.log( `Created fee rules` )

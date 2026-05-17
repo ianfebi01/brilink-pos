@@ -52,35 +52,36 @@ export function TransactionForm( {
 
   useEffect( () => {
     if ( watchAmount > 0 && watchCategoryId ) {
-      const filteredRules = feeRules.filter( ( r ) => r.categoryId === watchCategoryId );
+      const categoryRule = feeRules.find( ( r ) => r.categoryId === watchCategoryId );
       
-      const matchedRule = filteredRules.find( ( r ) => {
-        const min = r.minAmount !== null ? Number( r.minAmount ) : 0;
-        const max = r.maxAmount !== null ? Number( r.maxAmount ) : Infinity;
-        
-        return watchAmount >= min && watchAmount <= max;
-      } );
+      if ( categoryRule ) {
+        const tiers = typeof categoryRule.formulaJson === "string" 
+          ? JSON.parse( categoryRule.formulaJson ) 
+          : categoryRule.formulaJson;
+          
+        const matchedTier = tiers.find( ( t: any ) => {
+          const min = t.minAmount !== null ? Number( t.minAmount ) : 0;
+          const max = t.maxAmount !== null ? Number( t.maxAmount ) : Infinity;
+          
+          return watchAmount >= min && watchAmount <= max;
+        } );
 
-      if ( matchedRule ) {
-        form.setValue( "feeRuleId", matchedRule.id );
-        if ( matchedRule.formulaJson ) {
+        if ( matchedTier ) {
+          form.setValue( "feeRuleId", categoryRule.id );
           try {
-            const formulaJson = typeof matchedRule.formulaJson === "string" 
-              ? JSON.parse( matchedRule.formulaJson ) 
-              : matchedRule.formulaJson;
-            
-            const result = calculateTransaction( watchAmount, formulaJson );
-            setCalcResult( { ...result, appliedRule : matchedRule.name } );
+            const result = calculateTransaction( watchAmount, matchedTier.formulas );
+            setCalcResult( { ...result, appliedRule : `${categoryRule.name} (Tier: ${matchedTier.minAmount}-${matchedTier.maxAmount})` } );
           } catch ( e ) {
             console.error( "Formula error", e );
             setCalcResult( null );
           }
         } else {
-          setCalcResult( null );
+          form.setValue( "feeRuleId", "" );
+          setCalcResult( { error : "No amount tier matches this transaction amount." } );
         }
       } else {
         form.setValue( "feeRuleId", "" );
-        setCalcResult( { error : "No fee rule covers this amount." } );
+        setCalcResult( { error : "No fee rule defined for this category." } );
       }
     } else {
       setCalcResult( null );

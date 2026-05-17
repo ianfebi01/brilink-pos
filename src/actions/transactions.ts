@@ -2,6 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function createTransaction( data: {
   categoryId: string;
@@ -22,7 +24,17 @@ export async function createTransaction( data: {
     revalidatePath( "/transactions" );
     revalidatePath( "/" );
     
-    return { success : true, transaction };
+    return { 
+      success : true, 
+      transaction : {
+        ...transaction,
+        transactionAmount : Number( transaction.transactionAmount ),
+        customerFee       : Number( transaction.customerFee ),
+        briFee            : Number( transaction.briFee ),
+        agentProfit       : Number( transaction.agentProfit ),
+        totalPaid         : Number( transaction.totalPaid ),
+      }
+    };
   } catch ( error: any ) {
     console.error( error );
     
@@ -30,23 +42,50 @@ export async function createTransaction( data: {
   }
 }
 
-export async function getTransactions( limit = 10, offset = 0 ) {
+export async function getTransactions( limit = 50, offset = 0 ) {
   try {
+    const session = await getServerSession( authOptions );
+    const userRole = ( session?.user as any )?.role;
+
+    let where = {};
+    if ( userRole === "admin" ) {
+      const today = new Date();
+      today.setHours( 0, 0, 0, 0 );
+      where = { createdAt : { gte : today } };
+    }
+
     const [transactions, total] = await Promise.all( [
       prisma.transaction.findMany( {
+        where,
         take    : limit,
         skip    : offset,
         orderBy : { createdAt : "desc" },
         include : {
           category  : true,
           createdBy : true,
-          feeRule   : true,
+          feeRule   : {
+            select : {
+              id          : true,
+              name        : true,
+              formulaJson : true,
+              isActive    : true,
+            },
+          },
         },
       } ),
-      prisma.transaction.count(),
+      prisma.transaction.count( { where } ),
     ] );
+
+    const serializedTransactions = transactions.map( ( tx ) => ( {
+      ...tx,
+      transactionAmount : Number( tx.transactionAmount ),
+      customerFee       : Number( tx.customerFee ),
+      briFee            : Number( tx.briFee ),
+      agentProfit       : Number( tx.agentProfit ),
+      totalPaid         : Number( tx.totalPaid ),
+    } ) );
     
-    return { success : true, transactions, total };
+    return { success : true, transactions : serializedTransactions, total };
   } catch ( error: any ) {
     return { success : false, error : error.message };
   }

@@ -198,14 +198,30 @@ function FormulaFieldBuilder( { label, fieldKey, value, onChange }: FormulaBuild
   );
 }
 
-export function FeeRuleForm( { categories, onSuccess, initialData }: { categories: any[], onSuccess: () => void, initialData?: any } ) {
+export function FeeRuleForm( { 
+  categories, 
+  onSuccess, 
+  initialData,
+  existingCategoryIds = []
+}: { 
+  categories: any[], 
+  onSuccess: () => void, 
+  initialData?: any,
+  existingCategoryIds?: string[]
+} ) {
   const [loading, setLoading] = useState( false );
   const [categoryId, setCategoryId] = useState( initialData?.categoryId || "" );
   const [name, setName] = useState( initialData?.name || "" );
-  const [minAmount, setMinAmount] = useState<number | "">( initialData?.minAmount ?? "" );
-  const [maxAmount, setMaxAmount] = useState<number | "">( initialData?.maxAmount ?? "" );
 
-  // Default formulas
+  const isEditing = !!initialData?.id;
+
+  // Filter out categories that already have rules, BUT keep the current category if editing
+  const availableCategories = categories.filter( ( c ) => {
+    if ( isEditing && c.id === initialData.categoryId ) return true;
+    
+    return !existingCategoryIds.includes( c.id );
+  } );
+
   const defaultFormulas = {
     customer_fee : { type : "fixed", value : 10000 },
     bri_fee      : { type : "fixed", value : 5000 },
@@ -213,14 +229,41 @@ export function FeeRuleForm( { categories, onSuccess, initialData }: { categorie
     total_paid   : { type : "formula", expression : "amount + customer_fee" }
   };
 
-  const [formulas, setFormulas] = useState<Record<string, any>>(
+  const [tiers, setTiers] = useState<any[]>(
     initialData?.formulaJson 
       ? ( typeof initialData.formulaJson === "string" ? JSON.parse( initialData.formulaJson ) : initialData.formulaJson )
-      : defaultFormulas
+      : [{ minAmount : 0, maxAmount : 1000000, formulas : defaultFormulas }]
   );
 
-  const handleFormulaChange = ( key: string, val: any ) => {
-    setFormulas( prev => ( { ...prev, [key] : val } ) );
+  const addTier = () => {
+    const lastTier = tiers[tiers.length - 1];
+    const newMin = lastTier ? Number( lastTier.maxAmount ) + 1 : 0;
+    
+    setTiers( prev => [
+      ...prev, 
+      { 
+        minAmount : newMin, 
+        maxAmount : newMin + 1000000, 
+        formulas  : { ...defaultFormulas } 
+      }
+    ] );
+  };
+
+  const removeTier = ( index: number ) => {
+    setTiers( prev => prev.filter( ( _, i ) => i !== index ) );
+  };
+
+  const handleTierChange = ( index: number, field: string, value: any ) => {
+    setTiers( prev => {
+      const newTiers = [...prev];
+      if ( field === "formulas" ) {
+        newTiers[index].formulas = { ...newTiers[index].formulas, ...value };
+      } else {
+        newTiers[index][field] = value;
+      }
+      
+      return newTiers;
+    } );
   };
 
   const handleSubmit = async ( e: React.FormEvent ) => {
@@ -235,9 +278,7 @@ export function FeeRuleForm( { categories, onSuccess, initialData }: { categorie
     const payload = {
       categoryId,
       name,
-      minAmount   : minAmount === "" ? null : Number( minAmount ),
-      maxAmount   : maxAmount === "" ? null : Number( maxAmount ),
-      formulaJson : formulas
+      formulaJson : tiers
     };
 
     let res;
@@ -258,13 +299,14 @@ export function FeeRuleForm( { categories, onSuccess, initialData }: { categorie
 
   return (
     <form onSubmit={handleSubmit}
-      className="space-y-4"
+      className="space-y-6"
     >
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Category</Label>
           <Select value={categoryId}
             onValueChange={( val ) => setCategoryId( String( val ) )}
+            disabled={!!initialData?.id} // Cannot change category on edit
           >
             <SelectTrigger>
               <SelectValue placeholder="Select category">
@@ -272,7 +314,7 @@ export function FeeRuleForm( { categories, onSuccess, initialData }: { categorie
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {categories.map( ( c ) => (
+              {availableCategories.map( ( c ) => (
                 <SelectItem key={c.id}
                   value={c.id}
                 >{c.name}</SelectItem>
@@ -290,60 +332,91 @@ export function FeeRuleForm( { categories, onSuccess, initialData }: { categorie
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Min Amount (Optional)</Label>
-          <Input type="number"
-            value={minAmount}
-            onChange={( e ) => setMinAmount( e.target.value as any )}
-            placeholder="0"
-          />
+      <div className="space-y-4 pt-4 border-t">
+        <div className="flex justify-between items-center">
+          <h4 className="font-semibold text-sm">Tier Configuration</h4>
+          <Button type="button"
+            variant="outline"
+            size="sm"
+            onClick={addTier}
+          >
+            Add Amount Tier
+          </Button>
         </div>
-        <div className="space-y-2">
-          <Label>Max Amount (Optional)</Label>
-          <Input type="number"
-            value={maxAmount}
-            onChange={( e ) => setMaxAmount( e.target.value as any )}
-            placeholder="10000000"
-          />
+        
+        <div className="space-y-8">
+          {tiers.map( ( tier, index ) => (
+            <div key={index}
+              className="space-y-4 p-4 border rounded-lg bg-muted/5 relative"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tier {index + 1}</span>
+                {tiers.length > 1 && (
+                  <Button type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 h-6 px-2"
+                    onClick={() => removeTier( index )}
+                  >
+                    <X className="h-4 w-4 mr-1" /> Remove
+                  </Button>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Min Amount</Label>
+                  <Input type="number"
+                    value={tier.minAmount}
+                    onChange={( e ) => handleTierChange( index, "minAmount", Number( e.target.value ) )}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Max Amount</Label>
+                  <Input type="number"
+                    value={tier.maxAmount}
+                    onChange={( e ) => handleTierChange( index, "maxAmount", Number( e.target.value ) )}
+                    placeholder="1000000"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <FormulaFieldBuilder 
+                  label="Customer Fee"
+                  fieldKey="customer_fee" 
+                  value={tier.formulas.customer_fee}
+                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
+                />
+                <FormulaFieldBuilder 
+                  label="BRI Fee"
+                  fieldKey="bri_fee" 
+                  value={tier.formulas.bri_fee}
+                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
+                />
+                <FormulaFieldBuilder 
+                  label="Agent Profit"
+                  fieldKey="agent_profit" 
+                  value={tier.formulas.agent_profit}
+                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
+                />
+                <FormulaFieldBuilder 
+                  label="Total Paid"
+                  fieldKey="total_paid" 
+                  value={tier.formulas.total_paid}
+                  onChange={( k, v ) => handleTierChange( index, "formulas", { [k] : v } )} 
+                />
+              </div>
+            </div>
+          ) )}
         </div>
       </div>
 
-      <div className="space-y-2 pt-2 border-t">
-        <h4 className="font-semibold text-sm">Formula Configuration</h4>
-        <p className="text-xs text-muted-foreground mb-4">
-          Configure how fees are calculated. You can use variables: <code>amount</code>, <code>customer_fee</code>, <code>bri_fee</code>.
-        </p>
-
-        <FormulaFieldBuilder 
-          label="Customer Fee"
-          fieldKey="customer_fee" 
-          value={formulas.customer_fee}
-          onChange={handleFormulaChange} 
-        />
-        <FormulaFieldBuilder 
-          label="BRI Fee"
-          fieldKey="bri_fee" 
-          value={formulas.bri_fee}
-          onChange={handleFormulaChange} 
-        />
-        <FormulaFieldBuilder 
-          label="Agent Profit"
-          fieldKey="agent_profit" 
-          value={formulas.agent_profit}
-          onChange={handleFormulaChange} 
-        />
-        <FormulaFieldBuilder 
-          label="Total Paid"
-          fieldKey="total_paid" 
-          value={formulas.total_paid}
-          onChange={handleFormulaChange} 
-        />
-      </div>
-
-      <div className="flex justify-end pt-4">
+      <div className="flex justify-end pt-4 border-t">
         <Button type="submit"
           disabled={loading}
+          className="w-full sm:w-auto"
         >
           {loading ? "Saving..." : initialData?.id ? "Update Rule" : "Save Rule"}
         </Button>

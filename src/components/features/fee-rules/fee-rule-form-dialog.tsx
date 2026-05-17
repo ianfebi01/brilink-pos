@@ -17,10 +17,12 @@ export function FeeRuleFormDialog( {
   categories,
   initialData,
   trigger,
+  existingCategoryIds,
 }: {
   categories: any[]
   initialData?: any
   trigger?: React.ReactNode
+  existingCategoryIds?: string[]
 } ) {
   const [open, setOpen] = useState( false )
   const isEditing = !!initialData?.id
@@ -29,16 +31,14 @@ export function FeeRuleFormDialog( {
     <Dialog open={open}
       onOpenChange={setOpen}
     >
-      <DialogTrigger
-        render={
-          trigger || (
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Rule
-            </Button>
-          )
-        }
-      />
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New Rule
+          </Button>
+        )}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -51,6 +51,7 @@ export function FeeRuleFormDialog( {
         <FeeRuleForm
           categories={categories}
           initialData={initialData}
+          existingCategoryIds={existingCategoryIds}
           onSuccess={() => setOpen( false )}
         />
       </DialogContent>
