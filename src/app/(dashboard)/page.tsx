@@ -120,7 +120,9 @@ export default async function DashboardPage( {
             <CardHeader>
               <CardTitle>Ringkasan Laba</CardTitle>
               <CardDescription>
-                Menampilkan total laba bersih Anda selama 7 hari terakhir.
+                {period === "daily"
+                  ? "Menampilkan total laba bersih Anda selama 7 hari terakhir."
+                  : "Menampilkan total laba bersih Anda bulan ini."}
               </CardDescription>
             </CardHeader>
             <CardContent className="pl-2">

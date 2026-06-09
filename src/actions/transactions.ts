@@ -141,9 +141,10 @@ export async function getDashboardStats( period: "daily" | "monthly" = "daily" )
 
   const startDate = period === "daily" ? todayStart : startOfMonth;
   
-  // For chart: 7 days for daily, 30 days for monthly
-  const chartStartDate = new Date( todayStart );
-  chartStartDate.setDate( todayStart.getDate() - ( period === "daily" ? 7 : 30 ) );
+  // For chart: last 7 days for daily, from start of month for monthly
+  const chartStartDate = period === "monthly"
+    ? startOfMonth
+    : new Date( todayStart.getTime() - 7 * 24 * 60 * 60 * 1000 );
 
   const [
     transactionsCount,
